@@ -1,0 +1,167 @@
+// PlayBeat Digital — Prisma schema
+// Digital marketplace: products, categories, reviews, orders, users, coupons, newsletter, tickets
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String
+  passwordHash  String?
+  role          String   @default("customer") // super_admin | admin | finance | inventory | support | marketing | affiliate | customer
+  avatar        String?
+  points        Int      @default(0)
+  referralCode  String   @unique
+  referredBy    String?
+  status        String   @default("active") // active | suspended | pending
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  orders        Order[]
+  reviews       Review[]
+  tickets       Ticket[]
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String?
+  icon        String
+  color       String    @default("#1e3a8a")
+  createdAt   DateTime  @default(now())
+  products    Product[]
+}
+
+model Product {
+  id              String    @id @default(cuid())
+  name            String
+  slug            String    @unique
+  tagline         String
+  description     String
+  categoryId      String
+  category        Category  @relation(fields: [categoryId], references: [id])
+  brand           String
+  price           Float
+  compareAtPrice  Float?
+  currency        String    @default("USD")
+  stock           Int       @default(-1) // -1 = unlimited (digital)
+  rating          Float     @default(0)
+  reviewCount     Int       @default(0)
+  salesCount      Int       @default(0)
+  featured        Boolean   @default(false)
+  trending        Boolean   @default(false)
+  bestSeller      Boolean   @default(false)
+  flashDeal       Boolean   @default(false)
+  newArrival      Boolean   @default(false)
+  hasLicenseKey   Boolean   @default(false)
+  isSubscription  Boolean   @default(false)
+  subscriptionInterval String? // monthly | yearly
+  coverGradient   String    // tailwind gradient classes for visual
+  icon            String    // lucide icon name
+  tags            String
+  fileUrl         String?
+  fileName        String?
+  fileSize        String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  reviews         Review[]
+  orderItems      OrderItem[]
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  userName  String
+  userAvatar String?
+  rating    Int
+  title     String
+  comment   String
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Order {
+  id           String      @id @default(cuid())
+  number       String      @unique
+  userId       String?
+  user         User?       @relation(fields: [userId], references: [id])
+  customerName String
+  customerEmail String
+  status       String      @default("pending") // pending | paid | processing | completed | refunded | cancelled
+  paymentStatus String     @default("unpaid")  // unpaid | paid | refunded
+  paymentMethod String?    // card | apple_pay | google_pay | paypal
+  subtotal     Float
+  discount     Float       @default(0)
+  tax          Float       @default(0)
+  total        Float
+  currency     String      @default("USD")
+  couponCode   String?
+  items        OrderItem[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  name      String
+  price     Float
+  quantity  Int     @default(1)
+  licenseKey String?
+}
+
+model Coupon {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  type        String   // percentage | fixed | first_purchase | referral
+  value       Float
+  minSpend    Float    @default(0)
+  expiry      DateTime?
+  usageLimit  Int      @default(0) // 0 = unlimited
+  usedCount   Int      @default(0)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}
+
+model Ticket {
+  id        String   @id @default(cuid())
+  number    String   @unique
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  subject   String
+  category  String   // order | download | license | refund | other
+  priority  String   @default("normal") // low | normal | high | urgent
+  status    String   @default("open") // open | pending | resolved | closed
+  message   String
+  createdAt DateTime @default(now())
+}
+
+model Newsletter {
+  id    String   @id @default(cuid())
+  email String   @unique
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actor     String
+  action    String
+  entity    String
+  entityId  String?
+  createdAt DateTime @default(now())
+}

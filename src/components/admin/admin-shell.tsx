@@ -56,9 +56,7 @@ export function AdminShell({
       >
         <div className="flex h-16 items-center gap-2 border-b px-5">
           <button onClick={() => navigate({ name: 'home' })} className="flex items-center gap-2">
-            <span className="grid h-8 w-8 place-items-center rounded-lg bg-navy">
-              <Sparkles className="h-4 w-4 text-brand-yellow" />
-            </span>
+            <img src="/favicon.svg" alt="" className="h-8 w-8 rounded-lg" width={32} height={32} />
             <span className="text-sm font-bold">PlayBeat <span className="text-brand-yellow-foreground dark:text-brand-yellow">Admin</span></span>
           </button>
         </div>

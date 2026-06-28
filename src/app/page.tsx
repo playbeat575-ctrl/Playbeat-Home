@@ -11,6 +11,7 @@ import { WishlistView } from '@/components/shop/wishlist-view'
 import { CheckoutView } from '@/components/shop/checkout-view'
 import { AdminView } from '@/components/admin/admin-view'
 import { useStore } from '@/store/use-store'
+import { toast } from 'sonner'
 
 export default function Home() {
   return (
@@ -23,6 +24,21 @@ export default function Home() {
 function App() {
   const view = useStore((s) => s.view)
   const isAdmin = view.name === 'admin'
+
+  // Detect the Lemon Squeezy hosted-checkout success redirect (?lemon_success=1)
+  // and surface a confirmation toast, then clean the URL.
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('lemon_success') === '1') {
+      toast.success('Payment received via Lemon Squeezy', {
+        description: 'Your order is being processed. A receipt has been emailed to you.',
+      })
+      params.delete('lemon_success')
+      const rest = params.toString()
+      window.history.replaceState({}, '', rest ? `/?${rest}` : '/')
+    }
+  }, [])
 
   return (
     <div className="flex min-h-screen flex-col">

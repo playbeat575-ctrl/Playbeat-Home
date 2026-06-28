@@ -79,10 +79,13 @@ export function Navbar() {
             className="flex items-center gap-2"
             aria-label="PlayBeat Digital home"
           >
-            <span className="relative grid h-9 w-9 place-items-center rounded-xl bg-navy text-primary-foreground shadow-md">
-              <Sparkles className="h-5 w-5 text-brand-yellow" />
-              <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-brand-yellow ring-2 ring-background" />
-            </span>
+            <img
+              src="/favicon.svg"
+              alt=""
+              className="h-9 w-9 rounded-xl shadow-md"
+              width={36}
+              height={36}
+            />
             <span className="hidden text-base font-bold tracking-tight sm:block">
               PlayBeat<span className="text-brand-yellow-foreground dark:text-brand-yellow"> Digital</span>
             </span>
@@ -175,9 +178,7 @@ export function Navbar() {
               <SheetContent side="right" className="w-[300px]">
                 <SheetHeader>
                   <SheetTitle className="flex items-center gap-2">
-                    <span className="grid h-7 w-7 place-items-center rounded-lg bg-navy">
-                      <Sparkles className="h-4 w-4 text-brand-yellow" />
-                    </span>
+                    <img src="/favicon.svg" alt="" className="h-7 w-7 rounded-lg" width={28} height={28} />
                     PlayBeat Digital
                   </SheetTitle>
                 </SheetHeader>

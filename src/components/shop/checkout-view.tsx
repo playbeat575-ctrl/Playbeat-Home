@@ -42,6 +42,14 @@ export function CheckoutView() {
   const [couponLoading, setCouponLoading] = React.useState(false)
   const [processing, setProcessing] = React.useState(false)
   const [success, setSuccess] = React.useState<null | { orderId: string; orderNumber: string; items: any[]; total: number }>(null)
+  const [lemonStatus, setLemonStatus] = React.useState<{ liveCheckout?: boolean; configured?: boolean; user?: { name: string } } | null>(null)
+
+  React.useEffect(() => {
+    fetch('/api/lemon/status')
+      .then((r) => r.json())
+      .then((d) => setLemonStatus(d))
+      .catch(() => {})
+  }, [])
 
   const subtotal = cart.reduce((n, i) => n + i.product.price * i.quantity, 0)
   const discount = calcDiscount(subtotal, appliedCoupon)
@@ -82,20 +90,44 @@ export function CheckoutView() {
       return
     }
     setProcessing(true)
-    // Simulate Lemon Squeezy hosted checkout + webhook round-trip
-    await new Promise((r) => setTimeout(r, 1600))
+    const checkoutItems = cart.map((i) => ({
+      id: i.product.id,
+      name: i.product.name,
+      price: i.product.price,
+      quantity: i.quantity,
+      licenseKey: i.product.hasLicenseKey,
+    }))
+
     try {
+      // Step 1 — ask the server to create a Lemon Squeezy hosted checkout.
+      // If Lemon Squeezy isn't fully configured, the server returns { demo: true }
+      // and we fall back to the in-app demo checkout that creates the order directly.
+      const co = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: checkoutItems,
+          customer: { name, email },
+          coupon: appliedCoupon,
+          paymentMethod: method,
+        }),
+      })
+      const coData = await co.json()
+
+      if (coData.url) {
+        // Live Lemon Squeezy hosted checkout — redirect away.
+        toast.success('Redirecting to Lemon Squeezy secure checkout…')
+        window.location.href = coData.url
+        return
+      }
+
+      // Demo fallback — create the order directly in the database.
+      await new Promise((r) => setTimeout(r, 900))
       const res = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          items: cart.map((i) => ({
-            id: i.product.id,
-            name: i.product.name,
-            price: i.product.price,
-            quantity: i.quantity,
-            licenseKey: i.product.hasLicenseKey,
-          })),
+          items: checkoutItems,
           customer: { name, email },
           coupon: appliedCoupon,
           paymentMethod: method,
@@ -213,12 +245,25 @@ export function CheckoutView() {
           <ArrowLeft className="h-4 w-4" /> Continue shopping
         </button>
 
-        <div className="mb-6 flex items-center gap-2">
+        <div className="mb-6 flex flex-wrap items-center gap-2">
           <Lock className="h-5 w-5 text-emerald-500" />
           <h1 className="text-2xl font-bold tracking-tight">Secure checkout</h1>
           <Badge variant="secondary" className="ml-1 gap-1">
             <ShieldCheck className="h-3 w-3" /> Lemon Squeezy
           </Badge>
+          {lemonStatus?.liveCheckout ? (
+            <Badge className="gap-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Live checkout active
+            </Badge>
+          ) : lemonStatus?.configured ? (
+            <Badge variant="outline" className="gap-1 text-amber-600 dark:text-amber-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-500" /> API connected · demo mode
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="gap-1 text-muted-foreground">
+              <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground" /> Demo mode
+            </Badge>
+          )}
         </div>
 
         <div className="grid gap-8 lg:grid-cols-[1fr_400px]">

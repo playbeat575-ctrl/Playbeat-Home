@@ -68,3 +68,29 @@ Work Log:
 Stage Summary:
 - PlayBeat Digital complete and browser-verified end-to-end. Single-page app at / with client-side view switching.
 - Stack used (per environment): Next.js 16 + App Router + Prisma/SQLite + shadcn/ui + Framer Motion + Recharts + Zustand + TanStack Query + next-themes. (User's requested React+Vite/MongoDB/Express stack is not available in this sandbox; delivered equivalent functionality on the required Next.js stack.)
+
+---
+Task ID: 11 (logo + favicon + Neon Postgres + Lemon Squeezy)
+Agent: main
+Task: Add logo/favicon, migrate DB to Neon PostgreSQL, integrate real Lemon Squeezy API.
+
+Work Log:
+- LOGO/FAVICON: Generated premium logo via z-ai image-gen (navy badge + gold mark, 1024px) → public/logo.png. Created crisp SVG favicon (public/favicon.svg) with navy gradient + gold play triangle + spark. Derived apple-touch-icon.png (180px) + favicon-32.png via sharp. Updated layout.tsx metadata icons (5 links: favicon.svg, favicon-32.png, logo.png, apple-touch-icon.png) + OG image. Replaced Sparkles lucide icon with favicon.svg <img> in navbar, footer, admin sidebar, mobile sheet.
+- NEON POSTGRES: Updated prisma/schema.prisma datasource provider sqlite→postgresql. Wrote .env with Neon connection string (sslmode=require&channel_binding=require). Root-caused a stale shell DATABASE_URL=file:... export overriding .env (Prisma/node read process.env over .env); used `unset DATABASE_URL` wrapper for prisma + dev commands. Ran db:push (synced schema to Neon in 13s) + re-seeded (8 cats, 25 products, 48 orders, coupons, tickets). Made OrderItem.productId optional (nullable) to support webhook-created orders without local product mapping; pushed. Restarted dev server on Neon.
+- LEMON SQUEEZY: Installed @lemonsqueezy/lemonsqueezy.js@4.0.0 (official SDK). Built src/lib/lemon.ts: lemonSqueezySetup(apiKey), isLemonConfigured/isLiveCheckoutEnabled, getLemonStatus (validates key via getAuthenticatedUser + listStores), createHostedCheckout (createCheckout with customPrice + productOptions.redirectUrl), verifyWebhookSignature (HMAC-SHA256 timingSafeEqual). Routes: POST /api/checkout (creates real hosted checkout OR returns {demo:true}), GET /api/lemon/status, POST /api/lemon/webhook (signature-verified, creates orders on order_created, marks refunded on order_refunded). Updated CheckoutView: Pay button now calls /api/checkout first → redirects to Lemon Squeezy hosted URL if live, else falls back to demo /api/orders; added live/demo/API-connected status badge. page.tsx detects ?lemon_success=1 redirect → toast. .env.example documents all vars.
+- KEY FINDING: The provided JWT's `aud` claim (UUID) is the workspace, NOT the store ID. The real store ID is "420060" (numeric, from listStores). Fixed LEMON_STORE_ID. Store has 0 products yet → liveCheckout=false → demo mode active until user creates a product+variant in Lemon dashboard and sets LEMON_DEFAULT_VARIANT_ID.
+
+Verification (Agent Browser + curl):
+- /api/lemon/status → configured:true, user "Playbeat digital pvt ltd" / playbeat575@gmail.com, store 420060. ✓
+- POST /api/checkout → {"demo":true,"reason":"No default variant ID set"} ✓
+- POST /api/lemon/webhook no-sig → 401; bad-sig → 401 (verification works) ✓
+- /api/admin/stats → revenue $3241, 24 orders, 9 customers (Neon data) ✓
+- /api/admin/orders → 48 orders from Neon ✓
+- Browser: 5 icon <link>s in head, navbar logo img present, page title correct, 8 category cards render, no console/runtime errors ✓
+- VLM confirmed navy/yellow logo mark in navbar ✓
+
+Stage Summary:
+- Logo + favicon live in browser tab, navbar, footer, admin.
+- Database fully on Neon PostgreSQL (production-ready, was SQLite).
+- Lemon Squeezy officially integrated with real API key (account "Playbeat digital pvt ltd"). Live hosted checkout activates the moment user sets LEMON_DEFAULT_VARIANT_ID after creating a product in their Lemon dashboard. Webhook route production-ready with signature verification.
+- Lint clean. .env.example added.

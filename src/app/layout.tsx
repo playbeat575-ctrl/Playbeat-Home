@@ -39,7 +39,13 @@ export const metadata: Metadata = {
   authors: [{ name: "PlayBeat Digital" }],
   creator: "PlayBeat Digital",
   icons: {
-    icon: "/logo.svg",
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/logo.png", sizes: "1024x1024", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+    shortcut: "/favicon.svg",
   },
   openGraph: {
     title: "PlayBeat Digital — Premium Digital Marketplace",
@@ -48,6 +54,14 @@ export const metadata: Metadata = {
     url: SITE_URL,
     siteName: "PlayBeat Digital",
     type: "website",
+    images: [
+      {
+        url: "/logo.png",
+        width: 1024,
+        height: 1024,
+        alt: "PlayBeat Digital",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",

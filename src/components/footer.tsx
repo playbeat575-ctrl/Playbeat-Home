@@ -57,9 +57,7 @@ export function Footer() {
         <div className="grid grid-cols-2 gap-8 md:grid-cols-6">
           <div className="col-span-2">
             <button onClick={() => navigate({ name: 'home' })} className="flex items-center gap-2">
-              <span className="relative grid h-9 w-9 place-items-center rounded-xl bg-navy text-primary-foreground">
-                <Sparkles className="h-5 w-5 text-brand-yellow" />
-              </span>
+              <img src="/favicon.svg" alt="" className="h-9 w-9 rounded-xl" width={36} height={36} />
               <span className="text-base font-bold">
                 PlayBeat<span className="text-brand-yellow-foreground dark:text-brand-yellow"> Digital</span>
               </span>

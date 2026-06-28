@@ -142,3 +142,20 @@ Stage Summary:
 - Project live at https://github.com/crdbixx-code/playbeat-digital-marketplace (public).
 - Secrets (Neon DB URL, Lemon Squeezy API key) confirmed NOT pushed — .env untracked, only .env.example is public.
 - Token removed from git remote URL after push.
+
+---
+Task ID: 14 (delete all repos except playbeat-digital-marketplace)
+Agent: main
+Task: Delete all GitHub repositories except the one just pushed (playbeat-digital-marketplace).
+
+Work Log:
+- Fetched all user repos via paginated GET /user/repos (per_page=100). Total: 65 repositories.
+- Identified keep-target: crdbixx-code/playbeat-digital-marketplace (the project pushed in Task 13).
+- Tested token delete permissions with one repo (crdbixx-code/ef) → HTTP 204 (delete_repo scope present).
+- Built delete list of 63 remaining repos (excluding keep-target; ef already test-deleted).
+- Loop-deleted each via DELETE /repos/{owner}/{repo}. Results: 63 deleted, 0 failed. Combined with ef = 64 total deleted.
+- Verified via GET /user/repos: only crdbixx-code/playbeat-digital-marketplace remains (count = 1).
+
+Stage Summary:
+- 64 repositories deleted, 1 retained (playbeat-digital-marketplace).
+- All deletions irreversible (GitHub confirms via HTTP 204). No failures.

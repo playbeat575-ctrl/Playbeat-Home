@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { ProductCover } from '@/components/product-cover'
 import { useProducts } from '@/lib/hooks'
 import { useStore } from '@/store/use-store'
-import { formatCurrency } from '@/lib/format'
+import { useCurrency } from '@/lib/use-currency'
 import { toast } from 'sonner'
 import { Footer } from '@/components/footer'
 
@@ -18,6 +18,7 @@ export function WishlistView() {
   const addToCart = useStore((s) => s.addToCart)
   const navigate = useStore((s) => s.navigate)
   const { data } = useProducts({ limit: 60 })
+  const { format: fmt } = useCurrency()
   const items = (data?.products ?? []).filter((p) => wishlist.includes(p.id))
 
   return (
@@ -65,7 +66,7 @@ export function WishlistView() {
                     onClick={() => navigate({ name: 'product', slug: p.slug })}
                     className="relative aspect-[16/10] w-full"
                   >
-                    <ProductCover gradient={p.coverGradient} icon={p.icon} className="h-full w-full" />
+                    <ProductCover gradient={p.coverGradient} icon={p.icon} coverImage={p.coverImage} alt={p.name} className="h-full w-full" />
                   </button>
                   <div className="flex flex-1 flex-col gap-2 p-4">
                     <div className="flex items-center justify-between">
@@ -79,7 +80,7 @@ export function WishlistView() {
                       {p.name}
                     </button>
                     <div className="mt-auto flex items-center justify-between pt-3">
-                      <span className="text-lg font-bold">{formatCurrency(p.price)}</span>
+                      <span className="text-lg font-bold">{fmt(p.price)}</span>
                       <div className="flex gap-1.5">
                         <Button
                           size="sm"

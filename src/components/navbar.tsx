@@ -18,11 +18,12 @@ import { Badge } from '@/components/ui/badge'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { CommandDialog, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from '@/components/ui/command'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { CurrencySwitcher } from '@/components/currency-switcher'
 import { useStore } from '@/store/use-store'
 import { useProducts, useCategories } from '@/lib/hooks'
+import { useCurrency } from '@/lib/use-currency'
 import { ProductCover } from '@/components/product-cover'
 import { cn } from '@/lib/utils'
-import { formatCurrency } from '@/lib/format'
 
 export function Navbar() {
   const navigate = useStore((s) => s.navigate)
@@ -37,6 +38,7 @@ export function Navbar() {
   const categories = catData?.categories ?? []
   const [searchTerm, setSearchTerm] = React.useState('')
   const { data: searchData } = useProducts(searchTerm ? { q: searchTerm, limit: 8 } : {})
+  const { format: fmt } = useCurrency()
 
   React.useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8)
@@ -125,6 +127,8 @@ export function Navbar() {
             <Button variant="ghost" size="icon" className="rounded-full md:hidden" onClick={() => setSearchOpen(true)} aria-label="Search">
               <Search className="h-5 w-5" />
             </Button>
+
+            <CurrencySwitcher />
 
             <ThemeToggle />
 
@@ -273,12 +277,12 @@ export function Navbar() {
                   }}
                   className="gap-3"
                 >
-                  <ProductCover gradient={p.coverGradient} icon={p.icon} className="h-9 w-9 rounded-md" showShine={false} />
+                  <ProductCover gradient={p.coverGradient} icon={p.icon} coverImage={p.coverImage} alt={p.name} className="h-9 w-9 rounded-md" showShine={false} />
                   <div className="min-w-0 flex-1">
                     <div className="truncate text-sm font-medium">{p.name}</div>
                     <div className="truncate text-xs text-muted-foreground">{p.brand} · {p.category?.name}</div>
                   </div>
-                  <span className="text-sm font-semibold">{formatCurrency(p.price)}</span>
+                  <span className="text-sm font-semibold">{fmt(p.price)}</span>
                 </CommandItem>
               ))}
             </CommandGroup>

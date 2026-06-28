@@ -10,7 +10,8 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useAdminStats } from '@/lib/hooks'
-import { formatCurrency, formatCompact } from '@/lib/format'
+import { formatCompact } from '@/lib/format'
+import { useCurrency } from '@/lib/use-currency'
 import { TrendingUp, Globe, ShoppingCart, Clock, Download } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -18,6 +19,7 @@ const PIE_COLORS = ['#1e3a8a', '#facc15', '#10b981', '#f43f5e', '#94a3b8', '#8b5
 
 export function AnalyticsView() {
   const { data: stats, isLoading } = useAdminStats()
+  const { format: fmt } = useCurrency()
 
   if (isLoading || !stats) {
     return <div className="h-96 animate-pulse rounded-2xl bg-muted" />
@@ -125,7 +127,7 @@ export function AnalyticsView() {
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.4} vertical={false} />
               <XAxis dataKey="label" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" tickLine={false} axisLine={false} />
               <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" tickLine={false} axisLine={false} tickFormatter={(v) => `$${formatCompact(v)}`} />
-              <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 12, fontSize: 12 }} formatter={(v: any) => [formatCurrency(v), 'Revenue']} />
+              <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 12, fontSize: 12 }} formatter={(v: any) => [fmt(v), 'Revenue']} />
               <Line type="monotone" dataKey="value" stroke="#facc15" strokeWidth={2.5} dot={{ r: 3 }} />
             </LineChart>
           </ResponsiveContainer>
@@ -141,7 +143,7 @@ export function AnalyticsView() {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-medium">{c.name}</span>
-                    <span className="font-semibold">{formatCurrency(c.revenue)}</span>
+                    <span className="font-semibold">{fmt(c.revenue)}</span>
                   </div>
                   <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-muted">
                     <div className="h-full rounded-full bg-gradient-to-r from-navy to-brand-yellow" style={{ width: `${c.share * 2.6}%` }} />
@@ -161,7 +163,7 @@ export function AnalyticsView() {
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.4} horizontal={false} />
             <XAxis type="number" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" tickLine={false} axisLine={false} tickFormatter={(v) => `$${formatCompact(v)}`} />
             <YAxis type="category" dataKey="name" width={140} tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" tickLine={false} axisLine={false} />
-            <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 12, fontSize: 12 }} formatter={(v: any) => [formatCurrency(v), 'Revenue']} />
+            <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 12, fontSize: 12 }} formatter={(v: any) => [fmt(v), 'Revenue']} />
             <Bar dataKey="revenue" radius={[0, 6, 6, 0]}>
               {stats.topProducts.map((_, i) => (
                 <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />

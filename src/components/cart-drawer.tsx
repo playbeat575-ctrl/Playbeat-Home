@@ -9,7 +9,8 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { ProductCover } from '@/components/product-cover'
 import { useStore } from '@/store/use-store'
-import { formatCurrency, calcDiscount } from '@/lib/format'
+import { calcDiscount } from '@/lib/format'
+import { useCurrency } from '@/lib/use-currency'
 import { toast } from 'sonner'
 
 export function CartDrawer() {
@@ -23,6 +24,7 @@ export function CartDrawer() {
   const applyCoupon = useStore((s) => s.applyCoupon)
   const [code, setCode] = React.useState('')
   const [loading, setLoading] = React.useState(false)
+  const { format: fmt } = useCurrency()
 
   const subtotal = cart.reduce((n, i) => n + i.product.price * i.quantity, 0)
   const discount = calcDiscount(subtotal, appliedCoupon)
@@ -93,6 +95,8 @@ export function CartDrawer() {
                   <ProductCover
                     gradient={item.product.coverGradient}
                     icon={item.product.icon}
+                    coverImage={item.product.coverImage}
+                    alt={item.product.name}
                     className="h-16 w-16 shrink-0 rounded-lg"
                     showShine={false}
                   />
@@ -134,7 +138,7 @@ export function CartDrawer() {
                           <Plus className="h-3.5 w-3.5" />
                         </button>
                       </div>
-                      <span className="text-sm font-semibold">{formatCurrency(item.product.price * item.quantity)}</span>
+                      <span className="text-sm font-semibold">{fmt(item.product.price * item.quantity)}</span>
                     </div>
                   </div>
                 </div>
@@ -148,7 +152,7 @@ export function CartDrawer() {
                   <span className="inline-flex items-center gap-1.5 font-medium">
                     <Tag className="h-3.5 w-3.5 text-brand-yellow-foreground dark:text-brand-yellow" />
                     {appliedCoupon.code}
-                    <span className="text-muted-foreground">· -{formatCurrency(discount)}</span>
+                    <span className="text-muted-foreground">· -{fmt(discount)}</span>
                   </span>
                   <button
                     onClick={() => {
@@ -182,22 +186,22 @@ export function CartDrawer() {
               <div className="space-y-1.5 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Subtotal</span>
-                  <span className="font-medium">{formatCurrency(subtotal)}</span>
+                  <span className="font-medium">{fmt(subtotal)}</span>
                 </div>
                 {discount > 0 && (
                   <div className="flex justify-between text-emerald-600 dark:text-emerald-400">
                     <span>Discount</span>
-                    <span>-{formatCurrency(discount)}</span>
+                    <span>-{fmt(discount)}</span>
                   </div>
                 )}
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Tax (8%)</span>
-                  <span className="font-medium">{formatCurrency(tax)}</span>
+                  <span className="font-medium">{fmt(tax)}</span>
                 </div>
                 <Separator className="my-2" />
                 <div className="flex justify-between text-base font-bold">
                   <span>Total</span>
-                  <span>{formatCurrency(total)}</span>
+                  <span>{fmt(total)}</span>
                 </div>
               </div>
 

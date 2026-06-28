@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { CurrencySwitcher } from '@/components/currency-switcher'
 import { useStore } from '@/store/use-store'
 import { useAdminStats } from '@/lib/hooks'
 import { cn } from '@/lib/utils'
@@ -116,6 +117,7 @@ export function AdminShell({
               <Bell className="h-5 w-5" />
               <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-brand-yellow" />
             </Button>
+            <CurrencySwitcher />
             <ThemeToggle />
             <div className="flex items-center gap-2 rounded-full border px-2 py-1">
               <Avatar className="h-7 w-7">

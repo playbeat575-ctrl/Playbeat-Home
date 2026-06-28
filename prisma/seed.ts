@@ -1,8 +1,18 @@
 // PlayBeat Digital — seed script
 // Run: bun run seed
 import { PrismaClient } from '@prisma/client'
+import { readFileSync } from 'fs'
 
 const db = new PrismaClient()
+
+// Real cover images fetched via z-ai image-search (scripts/product-images.json)
+const productImages: Record<string, string> = (() => {
+  try {
+    return JSON.parse(readFileSync('/home/z/my-project/scripts/product-images.json', 'utf8'))
+  } catch {
+    return {}
+  }
+})()
 
 const gradients = [
   'from-blue-600 via-indigo-600 to-violet-700',
@@ -201,6 +211,7 @@ async function main() {
         isSubscription: !!s.flags.isSubscription,
         subscriptionInterval: s.flags.subscriptionInterval ?? null,
         coverGradient: s.gradient,
+        coverImage: productImages[s.name] || null,
         icon: s.icon,
         tags: s.tags.join(','),
         fileUrl: null,

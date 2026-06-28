@@ -7,8 +7,9 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useStore } from '@/store/use-store'
 import { useProducts } from '@/lib/hooks'
+import { useCurrency } from '@/lib/use-currency'
 import { ProductCover } from '@/components/product-cover'
-import { formatCurrency, discountPercent } from '@/lib/format'
+import { discountPercent } from '@/lib/format'
 import { Star, ShoppingCart } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -36,6 +37,7 @@ export function FlashDeals() {
   const { data, isLoading } = useProducts({ flag: 'flashDeal', limit: 4 })
   const products = data?.products ?? []
   const { h, m, s } = useCountdown(11)
+  const { format: fmt } = useCurrency()
 
   return (
     <section className="relative overflow-hidden bg-navy py-12 text-primary-foreground lg:py-16">
@@ -86,7 +88,7 @@ export function FlashDeals() {
                       onClick={() => navigate({ name: 'product', slug: p.slug })}
                       className="relative aspect-[16/10] w-full"
                     >
-                      <ProductCover gradient={p.coverGradient} icon={p.icon} className="h-full w-full" />
+                      <ProductCover gradient={p.coverGradient} icon={p.icon} coverImage={p.coverImage} alt={p.name} className="h-full w-full" />
                       <span className="absolute left-3 top-3 rounded-md bg-brand-yellow px-2 py-1 text-xs font-bold text-brand-yellow-foreground">
                         -{discount}%
                       </span>
@@ -105,9 +107,9 @@ export function FlashDeals() {
                       </div>
                       <div className="mt-auto flex items-end justify-between pt-2">
                         <div>
-                          <div className="text-lg font-bold">{formatCurrency(p.price)}</div>
+                          <div className="text-lg font-bold">{fmt(p.price)}</div>
                           {p.compareAtPrice && (
-                            <div className="text-xs text-primary-foreground/50 line-through">{formatCurrency(p.compareAtPrice)}</div>
+                            <div className="text-xs text-primary-foreground/50 line-through">{fmt(p.compareAtPrice)}</div>
                           )}
                         </div>
                         <Button

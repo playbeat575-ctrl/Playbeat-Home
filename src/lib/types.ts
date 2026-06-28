@@ -44,6 +44,7 @@ export interface Product {
   isSubscription: boolean
   subscriptionInterval: string | null
   coverGradient: string
+  coverImage: string | null
   icon: string
   tags: string[]
   fileName: string | null

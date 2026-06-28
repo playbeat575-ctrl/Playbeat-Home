@@ -94,3 +94,30 @@ Stage Summary:
 - Database fully on Neon PostgreSQL (production-ready, was SQLite).
 - Lemon Squeezy officially integrated with real API key (account "Playbeat digital pvt ltd"). Live hosted checkout activates the moment user sets LEMON_DEFAULT_VARIANT_ID after creating a product in their Lemon dashboard. Webhook route production-ready with signature verification.
 - Lint clean. .env.example added.
+
+---
+Task ID: 12 (PKR/USD currency + real product images)
+Agent: main
+Task: Default payment in PKR & USD; all products to have real images.
+
+Work Log:
+- REAL IMAGES: Wrote scripts/fetch-images.ts using z-ai image-search CLI (parsed stdout JSON). Fetched 25/25 real cover images (OSS URLs at sfile.chatglm.cn) — one per product, each from a descriptive query (e.g. "indie 2d game engine editor screenshot", "modern react component library dashboard ui"). Saved to scripts/product-images.json.
+- Added `coverImage String?` to Prisma Product schema → pushed to Neon. Updated serializer + types to include coverImage. Updated seed to read product-images.json and attach coverImage per product → re-seeded Neon (all 25 products now have real images).
+- Rewrote ProductCover component: renders real <img> (object-cover, lazy, onError→gradient fallback) with a gradient overlay (mix-blend-multiply 55%) + bottom dark gradient for legibility; falls back to gradient+icon when no image or on error. Updated all 10 ProductCover call sites (product-card, hero, flash-deals, cart-drawer, checkout, product-detail x2, wishlist, navbar search, admin-tables) to pass coverImage + alt.
+- CURRENCY (PKR + USD): Refactored src/lib/format.ts with SUPPORTED_CURRENCIES (USD rate 1, PKR rate 285), DEFAULT_CURRENCY='PKR', convertFromUsd/convertToUsd, formatCurrency(valueUsd, code) that converts + formats with correct symbol/decimals (PKR ₨ 0 decimals, USD $ 2 decimals). Added `currency` to Zustand store (persisted). Created src/lib/use-currency.ts hook returning {currency,setCurrency,format,convert,toUsd,info}. Created CurrencySwitcher dropdown component.
+- Wired CurrencySwitcher into navbar (storefront) + admin shell header. Default currency = PKR (user timezone Asia/Karachi).
+- Updated ALL price displays to use currency-aware fmt(): product-card, hero-slider, flash-deals, wishlist, product-detail (price + "Prices in {code}" note), cart-drawer (6 places), checkout-view (10 places + USD base note + currency label on total + display currency on success screen), admin dashboard (KPIs/charts/recent orders), admin-tables (products/orders/coupons), admin analytics.
+- Checkout: /api/orders now accepts + stores `currency` on the Order record (base amounts stay USD). CheckoutView sends currencyInfo.code with the order payload; success screen shows "Total paid (PKR)". Lemon Squeezy /api/checkout still sends USD base (Lemon store is USD) — display currency note shown in summary.
+
+Verification (Agent Browser + curl + VLM):
+- API returns real coverImage URLs for all featured/trending products ✓
+- 25+ real <img> elements loaded with real naturalWidth (1280x720, 1600x893, 1450px on detail) ✓
+- VLM confirmed product detail page shows "a real photograph/screenshot (not a gradient)" ✓
+- Currency switcher defaults to PKR (₨ symbol visible on home + product detail) ✓
+- Switching PKR→USD works: "Currency: USD" + prices show $19.00, $99.00, $39.00 ✓
+- Product detail shows "Prices in PKR" note ✓
+- Lint clean. Dev server healthy on Neon. No console/runtime errors.
+
+Stage Summary:
+- Every product now displays a real photograph (sourced via image-search) instead of a gradient block, with graceful gradient fallback.
+- Storefront + admin support PKR (default) and USD via a currency switcher in the header; all prices convert live. Orders record the display currency; underlying amounts stay USD for Lemon Squeezy / accounting.

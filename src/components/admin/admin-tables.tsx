@@ -17,7 +17,8 @@ import {
 import { ProductCover } from '@/components/product-cover'
 import { StatusBadge } from '@/components/admin/dashboard'
 import { useAdminProducts, useAdminOrders, useAdminCustomers, useAdminCoupons, useAdminTickets } from '@/lib/hooks'
-import { formatCurrency, formatDate, formatCompact } from '@/lib/format'
+import { formatDate, formatCompact } from '@/lib/format'
+import { useCurrency } from '@/lib/use-currency'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 
@@ -25,6 +26,7 @@ export function ProductsTable() {
   const { data, isLoading } = useAdminProducts()
   const products = data?.products ?? []
   const [search, setSearch] = React.useState('')
+  const { format: fmt } = useCurrency()
 
   const filtered = products.filter(
     (p) => p.name.toLowerCase().includes(search.toLowerCase()) || p.brand.toLowerCase().includes(search.toLowerCase())
@@ -70,7 +72,7 @@ export function ProductsTable() {
                   <tr key={p.id} className="border-b last:border-0 transition-colors hover:bg-secondary/30">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <ProductCover gradient={p.coverGradient} icon={p.icon} className="h-10 w-10 shrink-0 rounded-lg" showShine={false} />
+                        <ProductCover gradient={p.coverGradient} icon={p.icon} coverImage={p.coverImage} alt={p.name} className="h-10 w-10 shrink-0 rounded-lg" showShine={false} />
                         <div className="min-w-0">
                           <div className="line-clamp-1 text-sm font-medium">{p.name}</div>
                           <div className="text-[11px] text-muted-foreground">{p.brand}</div>
@@ -78,7 +80,7 @@ export function ProductsTable() {
                       </div>
                     </td>
                     <td className="px-4 py-3 text-xs text-muted-foreground">{p.category?.name ?? '—'}</td>
-                    <td className="px-4 py-3 font-semibold">{formatCurrency(p.price)}</td>
+                    <td className="px-4 py-3 font-semibold">{fmt(p.price)}</td>
                     <td className="px-4 py-3 text-muted-foreground">{formatCompact(p.salesCount)}</td>
                     <td className="px-4 py-3">
                       <span className="inline-flex items-center gap-1 text-xs">
@@ -126,6 +128,7 @@ export function OrdersTable() {
   const orders = data?.orders ?? []
   const [search, setSearch] = React.useState('')
   const [status, setStatus] = React.useState('all')
+  const { format: fmt } = useCurrency()
 
   const { data: filteredData } = useAdminOrders(status)
   const list = (status === 'all' ? orders : filteredData?.orders ?? orders).filter(
@@ -192,7 +195,7 @@ export function OrdersTable() {
                       </div>
                     </td>
                     <td className="px-4 py-3"><StatusBadge status={o.status} /></td>
-                    <td className="px-4 py-3 font-semibold">{formatCurrency(o.total)}</td>
+                    <td className="px-4 py-3 font-semibold">{fmt(o.total)}</td>
                     <td className="px-4 py-3 text-xs text-muted-foreground">{formatDate(o.createdAt)}</td>
                     <td className="px-4 py-3 text-right">
                       <DropdownMenu>
@@ -314,6 +317,7 @@ export function CustomersTable() {
 export function CouponsTable() {
   const { data, isLoading } = useAdminCoupons()
   const coupons = data?.coupons ?? []
+  const { format: fmt } = useCurrency()
 
   return (
     <Card className="overflow-hidden shadow-card-soft">
@@ -349,9 +353,9 @@ export function CouponsTable() {
                     </td>
                     <td className="px-4 py-3 capitalize text-xs">{c.type.replace('_', ' ')}</td>
                     <td className="px-4 py-3 text-xs font-semibold">
-                      {c.type === 'percentage' || c.type === 'first_purchase' || c.type === 'referral' ? `${c.value}%` : formatCurrency(c.value)}
+                      {c.type === 'percentage' || c.type === 'first_purchase' || c.type === 'referral' ? `${c.value}%` : fmt(c.value)}
                     </td>
-                    <td className="px-4 py-3 text-xs text-muted-foreground">{c.minSpend ? formatCurrency(c.minSpend) : '—'}</td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground">{c.minSpend ? fmt(c.minSpend) : '—'}</td>
                     <td className="px-4 py-3 text-xs">
                       <div className="flex items-center gap-2">
                         <span>{c.usedCount}{c.usageLimit ? ` / ${c.usageLimit}` : ''}</span>

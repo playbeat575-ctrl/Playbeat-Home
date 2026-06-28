@@ -14,7 +14,8 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useAdminStats, useAdminOrders } from '@/lib/hooks'
-import { formatCurrency, formatCompact, formatDate } from '@/lib/format'
+import { formatCompact, formatDate } from '@/lib/format'
+import { useCurrency } from '@/lib/use-currency'
 import { cn } from '@/lib/utils'
 
 const PIE_COLORS = ['#1e3a8a', '#facc15', '#10b981', '#f43f5e', '#94a3b8']
@@ -23,6 +24,7 @@ export function AdminDashboard() {
   const { data: stats, isLoading } = useAdminStats()
   const { data: ordersData } = useAdminOrders()
   const recentOrders = ordersData?.orders.slice(0, 6) ?? []
+  const { format: fmt, info: currencyInfo } = useCurrency()
 
   if (isLoading || !stats) {
     return (
@@ -35,7 +37,7 @@ export function AdminDashboard() {
   }
 
   const kpis = [
-    { label: 'Revenue (30d)', value: formatCurrency(stats.revenue), change: stats.revenueChange, icon: DollarSign, tint: 'text-emerald-600' },
+    { label: 'Revenue (30d)', value: fmt(stats.revenue), change: stats.revenueChange, icon: DollarSign, tint: 'text-emerald-600' },
     { label: 'Orders (30d)', value: stats.orders.toLocaleString(), change: stats.ordersChange, icon: ShoppingCart, tint: 'text-blue-600' },
     { label: 'Customers', value: stats.customers.toLocaleString(), change: stats.customersChange, icon: Users, tint: 'text-violet-600' },
     { label: 'Conversion', value: `${stats.conversion}%`, change: stats.conversionChange, icon: TrendingUp, tint: 'text-amber-600' },
@@ -81,7 +83,7 @@ export function AdminDashboard() {
           <div className="mb-4 flex items-center justify-between">
             <div>
               <h3 className="text-sm font-semibold">Revenue overview</h3>
-              <p className="text-xs text-muted-foreground">Monthly revenue · last 12 months</p>
+              <p className="text-xs text-muted-foreground">Monthly revenue · last 12 months · {currencyInfo.code}</p>
             </div>
             <Badge variant="secondary" className="gap-1">
               <Activity className="h-3 w-3" /> Live
@@ -100,7 +102,7 @@ export function AdminDashboard() {
               <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" tickLine={false} axisLine={false} tickFormatter={(v) => `$${formatCompact(v)}`} />
               <Tooltip
                 contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 12, fontSize: 12 }}
-                formatter={(v: any) => [formatCurrency(v), 'Revenue']}
+                formatter={(v: any) => [fmt(v), 'Revenue']}
               />
               <Area type="monotone" dataKey="value" stroke="#facc15" strokeWidth={2.5} fill="url(#revGrad)" />
             </AreaChart>
@@ -189,7 +191,7 @@ export function AdminDashboard() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-xs font-semibold">{formatCurrency(p.revenue)}</div>
+                  <div className="text-xs font-semibold">{fmt(p.revenue)}</div>
                   <div className="text-[10px] text-muted-foreground">{formatCompact(p.sales)} sold</div>
                 </div>
               </div>
@@ -202,8 +204,8 @@ export function AdminDashboard() {
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="grid gap-4 sm:grid-cols-2 lg:col-span-1">
           <MiniStat icon={Package} label="Products" value={stats.productCount.toString()} />
-          <MiniStat icon={CreditCard} label="Avg order value" value={formatCurrency(stats.aov)} />
-          <MiniStat icon={RotateCcw} label="Refunds (total)" value={formatCurrency(stats.refundTotal)} tint="text-rose-500" />
+          <MiniStat icon={CreditCard} label="Avg order value" value={fmt(stats.aov)} />
+          <MiniStat icon={RotateCcw} label="Refunds (total)" value={fmt(stats.refundTotal)} tint="text-rose-500" />
           <MiniStat icon={Crown} label="Pro members" value="8.4K" tint="text-brand-yellow-foreground dark:text-brand-yellow" />
         </div>
 
@@ -235,7 +237,7 @@ export function AdminDashboard() {
                       <div className="text-[10px] text-muted-foreground">{o.customerEmail}</div>
                     </td>
                     <td className="py-2.5"><StatusBadge status={o.status} /></td>
-                    <td className="py-2.5 text-right font-semibold">{formatCurrency(o.total)}</td>
+                    <td className="py-2.5 text-right font-semibold">{fmt(o.total)}</td>
                     <td className="py-2.5 text-right text-xs text-muted-foreground">{formatDate(o.createdAt)}</td>
                   </tr>
                 ))}

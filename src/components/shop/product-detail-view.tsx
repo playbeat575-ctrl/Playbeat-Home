@@ -17,7 +17,8 @@ import { ProductCover, Icon } from '@/components/product-cover'
 import { ProductCard } from '@/components/product-card'
 import { useProduct } from '@/lib/hooks'
 import { useStore, useRecentlyViewed } from '@/store/use-store'
-import { formatCurrency, formatCompact, discountPercent, formatDate } from '@/lib/format'
+import { formatCompact, discountPercent, formatDate } from '@/lib/format'
+import { useCurrency } from '@/lib/use-currency'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import { Footer } from '@/components/footer'
@@ -42,6 +43,7 @@ export function ProductDetailView({ slug }: { slug: string }) {
   const setCartOpen = useStore((s) => s.setCartOpen)
   const toggleWishlist = useStore((s) => s.toggleWishlist)
   const wishlisted = useStore((s) => (data ? s.wishlist.includes(data.product.id) : false))
+  const { format: fmt, info: currencyInfo } = useCurrency()
   const recentlyViewed = useRecentlyViewed()
   const [variant, setVariant] = React.useState(VARIANTS[0])
   const [qty, setQty] = React.useState(1)
@@ -106,7 +108,7 @@ export function ProductDetailView({ slug }: { slug: string }) {
               transition={{ duration: 0.4 }}
               className="relative aspect-[4/3] overflow-hidden rounded-3xl border shadow-card-soft"
             >
-              <ProductCover gradient={product.coverGradient} icon={product.icon} className="h-full w-full" />
+              <ProductCover gradient={product.coverGradient} icon={product.icon} coverImage={product.coverImage} alt={product.name} className="h-full w-full" />
               {discount > 0 && (
                 <span className="absolute left-4 top-4 rounded-full bg-brand-yellow px-3 py-1 text-sm font-bold text-brand-yellow-foreground shadow">
                   -{discount}%
@@ -123,7 +125,7 @@ export function ProductDetailView({ slug }: { slug: string }) {
                     i === 0 ? 'ring-2 ring-brand-yellow' : 'opacity-70 hover:opacity-100'
                   )}
                 >
-                  <ProductCover gradient={product.coverGradient} icon={product.icon} className="h-full w-full" showShine={false} />
+                  <ProductCover gradient={product.coverGradient} icon={product.icon} coverImage={product.coverImage} alt={product.name} className="h-full w-full" showShine={false} />
                 </div>
               ))}
             </div>
@@ -176,17 +178,17 @@ export function ProductDetailView({ slug }: { slug: string }) {
 
             {/* price */}
             <div className="mt-6 flex items-end gap-3">
-              <span className="text-4xl font-bold">{formatCurrency(product.price)}</span>
+              <span className="text-4xl font-bold">{fmt(product.price)}</span>
               {product.compareAtPrice && product.compareAtPrice > product.price && (
-                <span className="mb-1 text-lg text-muted-foreground line-through">{formatCurrency(product.compareAtPrice)}</span>
+                <span className="mb-1 text-lg text-muted-foreground line-through">{fmt(product.compareAtPrice)}</span>
               )}
               {discount > 0 && (
                 <span className="mb-1.5 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                  Save {formatCurrency((product.compareAtPrice ?? 0) - product.price)}
+                  Save {fmt((product.compareAtPrice ?? 0) - product.price)}
                 </span>
               )}
             </div>
-            <p className="mt-1 text-xs text-muted-foreground">VAT included · {product.fileSize ?? 'Instant delivery'}</p>
+            <p className="mt-1 text-xs text-muted-foreground">VAT included · Prices in {currencyInfo.code} · {product.fileSize ?? 'Instant delivery'}</p>
 
             {/* variants */}
             <div className="mt-6">

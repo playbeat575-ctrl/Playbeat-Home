@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ProductCover } from '@/components/product-cover'
 import { useStore } from '@/store/use-store'
-import { formatCurrency, formatCompact, discountPercent } from '@/lib/format'
+import { useCurrency } from '@/lib/use-currency'
+import { formatCompact, discountPercent } from '@/lib/format'
 import type { Product } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
@@ -17,6 +18,7 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
   const addToCart = useStore((s) => s.addToCart)
   const toggleWishlist = useStore((s) => s.toggleWishlist)
   const wishlisted = useStore((s) => s.wishlist.includes(product.id))
+  const { format: fmt } = useCurrency()
   const discount = discountPercent(product.price, product.compareAtPrice)
 
   return (
@@ -34,7 +36,7 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
         className="relative block aspect-[16/10] w-full text-left"
         aria-label={`View ${product.name}`}
       >
-        <ProductCover gradient={product.coverGradient} icon={product.icon} className="h-full w-full" />
+        <ProductCover gradient={product.coverGradient} icon={product.icon} coverImage={product.coverImage} alt={product.name} className="h-full w-full" />
 
         {/* badges */}
         <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
@@ -107,10 +109,10 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
 
         <div className="mt-auto flex items-center justify-between pt-3">
           <div className="flex items-baseline gap-2">
-            <span className="text-lg font-bold text-foreground">{formatCurrency(product.price)}</span>
+            <span className="text-lg font-bold text-foreground">{fmt(product.price)}</span>
             {product.compareAtPrice && product.compareAtPrice > product.price && (
               <span className="text-xs text-muted-foreground line-through">
-                {formatCurrency(product.compareAtPrice)}
+                {fmt(product.compareAtPrice)}
               </span>
             )}
           </div>

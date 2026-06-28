@@ -13,7 +13,8 @@ import { Separator } from '@/components/ui/separator'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { ProductCover } from '@/components/product-cover'
 import { useStore } from '@/store/use-store'
-import { formatCurrency, calcDiscount } from '@/lib/format'
+import { calcDiscount } from '@/lib/format'
+import { useCurrency } from '@/lib/use-currency'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import { Footer } from '@/components/footer'
@@ -41,7 +42,7 @@ export function CheckoutView() {
   const [couponInput, setCouponInput] = React.useState('')
   const [couponLoading, setCouponLoading] = React.useState(false)
   const [processing, setProcessing] = React.useState(false)
-  const [success, setSuccess] = React.useState<null | { orderId: string; orderNumber: string; items: any[]; total: number }>(null)
+  const [success, setSuccess] = React.useState<null | { orderId: string; orderNumber: string; items: any[]; total: number; currency?: string; displayTotal?: number }>(null)
   const [lemonStatus, setLemonStatus] = React.useState<{ liveCheckout?: boolean; configured?: boolean; user?: { name: string } } | null>(null)
 
   React.useEffect(() => {
@@ -50,6 +51,8 @@ export function CheckoutView() {
       .then((d) => setLemonStatus(d))
       .catch(() => {})
   }, [])
+
+  const { format: fmt, info: currencyInfo, convert } = useCurrency()
 
   const subtotal = cart.reduce((n, i) => n + i.product.price * i.quantity, 0)
   const discount = calcDiscount(subtotal, appliedCoupon)
@@ -131,6 +134,7 @@ export function CheckoutView() {
           customer: { name, email },
           coupon: appliedCoupon,
           paymentMethod: method,
+          currency: currencyInfo.code,
         }),
       })
       const data = await res.json()
@@ -140,6 +144,8 @@ export function CheckoutView() {
         orderNumber: data.orderNumber,
         items: data.items,
         total: data.total,
+        currency: currencyInfo.code,
+        displayTotal: convert(data.total),
       })
       clearCart()
       toast.success('Payment successful!')
@@ -201,7 +207,7 @@ export function CheckoutView() {
                   <div key={i} className="rounded-xl border p-3">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium">{it.name}</span>
-                      <span className="text-sm font-semibold">{formatCurrency(it.price * it.quantity)}</span>
+                      <span className="text-sm font-semibold">{fmt(it.price * it.quantity)}</span>
                     </div>
                     {it.licenseKey && (
                       <div className="mt-2 flex items-center gap-2 rounded-lg bg-secondary px-3 py-2">
@@ -218,8 +224,8 @@ export function CheckoutView() {
               </div>
 
               <div className="mt-4 flex items-center justify-between rounded-xl bg-secondary p-3 text-sm">
-                <span className="text-muted-foreground">Total paid</span>
-                <span className="font-bold">{formatCurrency(success.total)}</span>
+                <span className="text-muted-foreground">Total paid ({success.currency || 'USD'})</span>
+                <span className="font-bold">{fmt(success.total)}</span>
               </div>
 
               <div className="mt-4 rounded-xl border border-dashed p-3 text-xs text-muted-foreground">
@@ -361,12 +367,12 @@ export function CheckoutView() {
               <div className="mt-4 max-h-72 space-y-3 overflow-y-auto scrollbar-slim pr-1">
                 {cart.map((item) => (
                   <div key={item.product.id} className="flex gap-3">
-                    <ProductCover gradient={item.product.coverGradient} icon={item.product.icon} className="h-12 w-12 shrink-0 rounded-lg" showShine={false} />
+                    <ProductCover gradient={item.product.coverGradient} icon={item.product.icon} coverImage={item.product.coverImage} alt={item.product.name} className="h-12 w-12 shrink-0 rounded-lg" showShine={false} />
                     <div className="min-w-0 flex-1">
                       <div className="line-clamp-1 text-sm font-medium">{item.product.name}</div>
                       <div className="text-xs text-muted-foreground">Qty {item.quantity} · {item.variant ?? 'Personal'}</div>
                     </div>
-                    <span className="text-sm font-semibold">{formatCurrency(item.product.price * item.quantity)}</span>
+                    <span className="text-sm font-semibold">{fmt(item.product.price * item.quantity)}</span>
                   </div>
                 ))}
               </div>
@@ -402,23 +408,28 @@ export function CheckoutView() {
               <div className="space-y-1.5 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Subtotal</span>
-                  <span>{formatCurrency(subtotal)}</span>
+                  <span>{fmt(subtotal)}</span>
                 </div>
                 {discount > 0 && (
                   <div className="flex justify-between text-emerald-600 dark:text-emerald-400">
                     <span>Discount</span>
-                    <span>-{formatCurrency(discount)}</span>
+                    <span>-{fmt(discount)}</span>
                   </div>
                 )}
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Tax (8%)</span>
-                  <span>{formatCurrency(tax)}</span>
+                  <span>{fmt(tax)}</span>
                 </div>
                 <Separator className="my-2" />
                 <div className="flex justify-between text-base font-bold">
-                  <span>Total</span>
-                  <span>{formatCurrency(total)}</span>
+                  <span>Total <span className="text-xs font-normal text-muted-foreground">({currencyInfo.code})</span></span>
+                  <span>{fmt(total)}</span>
                 </div>
+                {currencyInfo.code !== 'USD' && (
+                  <p className="text-[11px] text-muted-foreground">
+                    ≈ ${total.toFixed(2)} USD base · checkout processed in USD via Lemon Squeezy.
+                  </p>
+                )}
               </div>
 
               <Button size="lg" className="mt-4 w-full gap-2" onClick={pay} disabled={processing}>
@@ -428,7 +439,7 @@ export function CheckoutView() {
                   </>
                 ) : (
                   <>
-                    <Lock className="h-4 w-4" /> Pay {formatCurrency(total)}
+                    <Lock className="h-4 w-4" /> Pay {fmt(total)}
                   </>
                 )}
               </Button>

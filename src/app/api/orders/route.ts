@@ -14,17 +14,20 @@ function genLicenseKey() {
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}))
-  const { items, customer, coupon, paymentMethod = 'card' } = body as {
+  const { items, customer, coupon, paymentMethod = 'card', currency = 'USD' } = body as {
     items: { id: string; name: string; price: number; quantity: number; licenseKey?: boolean }[]
     customer: { name: string; email: string }
     coupon?: { code: string; type: string; value: number } | null
     paymentMethod?: string
+    currency?: string
   }
 
   if (!items?.length || !customer?.name || !customer?.email) {
     return NextResponse.json({ error: 'Missing order data' }, { status: 400 })
   }
 
+  // Prices are stored in USD (base currency). The customer's display currency
+  // is recorded on the order for reference.
   const subtotal = Math.round(items.reduce((n, i) => n + i.price * i.quantity, 0) * 100) / 100
   let discount = 0
   if (coupon) {
@@ -49,6 +52,7 @@ export async function POST(req: Request) {
       discount,
       tax,
       total,
+      currency,
       couponCode: coupon?.code || null,
       items: {
         create: items.map((i) => ({

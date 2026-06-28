@@ -36,6 +36,7 @@ export function serializeProduct(p: any): Product {
     isSubscription: p.isSubscription,
     subscriptionInterval: p.subscriptionInterval,
     coverGradient: p.coverGradient,
+    coverImage: p.coverImage,
     icon: p.icon,
     tags: p.tags ? p.tags.split(',').filter(Boolean) : [],
     fileName: p.fileName,

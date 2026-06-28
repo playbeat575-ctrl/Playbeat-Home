@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useStore } from '@/store/use-store'
 import { useProducts } from '@/lib/hooks'
+import { useCurrency } from '@/lib/use-currency'
 import { ProductCover } from '@/components/product-cover'
 import { formatCompact } from '@/lib/format'
 import { cn } from '@/lib/utils'
@@ -46,6 +47,7 @@ export function HeroSlider() {
   const navigate = useStore((s) => s.navigate)
   const { data } = useProducts({ flag: SLIDES[index].flag, limit: 4 })
   const products = data?.products ?? []
+  const { format: fmt } = useCurrency()
 
   React.useEffect(() => {
     const t = setInterval(() => setIndex((i) => (i + 1) % SLIDES.length), 7000)
@@ -144,12 +146,12 @@ export function HeroSlider() {
                       i % 2 === 1 && 'mt-8'
                     )}
                   >
-                    <ProductCover gradient={p.coverGradient} icon={p.icon} className="aspect-[4/3] w-full" />
+                    <ProductCover gradient={p.coverGradient} icon={p.icon} coverImage={p.coverImage} alt={p.name} className="aspect-[4/3] w-full" />
                     <div className="p-3">
                       <div className="text-xs text-muted-foreground">{p.brand}</div>
                       <div className="line-clamp-1 text-sm font-semibold">{p.name}</div>
                       <div className="mt-1 flex items-center justify-between">
-                        <span className="text-sm font-bold">${p.price}</span>
+                        <span className="text-sm font-bold">{fmt(p.price)}</span>
                         <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
                           <Star className="h-3 w-3 fill-brand-yellow text-brand-yellow" />
                           {p.rating.toFixed(1)}

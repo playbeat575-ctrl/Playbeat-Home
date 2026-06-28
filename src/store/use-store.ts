@@ -3,11 +3,17 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import type { CartItem, Product, View, AdminSection, Role } from '@/lib/types'
+import type { CurrencyCode } from '@/lib/format'
+import { DEFAULT_CURRENCY } from '@/lib/format'
 
 interface StoreState {
   // Navigation
   view: View
   navigate: (view: View) => void
+
+  // Currency
+  currency: CurrencyCode
+  setCurrency: (c: CurrencyCode) => void
 
   // Cart
   cart: CartItem[]
@@ -52,6 +58,9 @@ export const useStore = create<StoreState>()(
           window.scrollTo({ top: 0, behavior: 'smooth' })
         }
       },
+
+      currency: DEFAULT_CURRENCY,
+      setCurrency: (c) => set({ currency: c }),
 
       cart: [],
       cartOpen: false,
@@ -119,6 +128,7 @@ export const useStore = create<StoreState>()(
         recentlyViewed: s.recentlyViewed,
         appliedCoupon: s.appliedCoupon,
         user: s.user,
+        currency: s.currency,
       }),
     }
   )

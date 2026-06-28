@@ -1,11 +1,72 @@
 // Formatting + small helpers
 
-export function formatCurrency(value: number, currency = 'USD') {
-  return new Intl.NumberFormat('en-US', {
+export type CurrencyCode = 'USD' | 'PKR'
+
+export interface CurrencyInfo {
+  code: CurrencyCode
+  symbol: string
+  label: string
+  /** Conversion rate from USD (1 USD = rate * targetCurrency) */
+  rate: number
+  decimals: number
+  locale: string
+}
+
+/**
+ * Supported display currencies.
+ * USD is the base currency stored in the database; PKR is converted at a
+ * fixed reference rate for display & payment. Update `rate` to reflect your
+ * current conversion rate (e.g. to use a live rate from an FX API).
+ */
+export const SUPPORTED_CURRENCIES: CurrencyInfo[] = [
+  { code: 'USD', symbol: '$', label: 'US Dollar', rate: 1, decimals: 2, locale: 'en-US' },
+  { code: 'PKR', symbol: '₨', label: 'Pakistani Rupee', rate: 285, decimals: 0, locale: 'en-PK' },
+]
+
+export const DEFAULT_CURRENCY: CurrencyCode = 'PKR'
+
+export function getCurrency(code: CurrencyCode): CurrencyInfo {
+  return SUPPORTED_CURRENCIES.find((c) => c.code === code) ?? SUPPORTED_CURRENCIES[0]
+}
+
+/** Convert an amount from USD to the target currency. */
+export function convertFromUsd(usd: number, code: CurrencyCode): number {
+  const c = getCurrency(code)
+  const v = usd * c.rate
+  const p = Math.pow(10, c.decimals)
+  return Math.round(v * p) / p
+}
+
+/** Convert an amount from the source currency back to USD. */
+export function convertToUsd(amount: number, code: CurrencyCode): number {
+  const c = getCurrency(code)
+  return Math.round((amount / c.rate) * 100) / 100
+}
+
+/**
+ * Format a USD amount into the given display currency.
+ * `value` is always treated as USD (the base/storage currency).
+ */
+export function formatCurrency(valueUsd: number, currency: CurrencyCode = 'USD') {
+  const c = getCurrency(currency)
+  const converted = convertFromUsd(valueUsd, currency)
+  return new Intl.NumberFormat(c.locale, {
     style: 'currency',
-    currency,
-    maximumFractionDigits: 2,
-  }).format(value)
+    currency: c.code,
+    minimumFractionDigits: c.decimals,
+    maximumFractionDigits: c.decimals,
+  }).format(converted)
+}
+
+/** Format with an explicit symbol prefix (used for compact UI badges). */
+export function formatCurrencyShort(valueUsd: number, currency: CurrencyCode = 'USD') {
+  const c = getCurrency(currency)
+  const converted = convertFromUsd(valueUsd, currency)
+  const num = new Intl.NumberFormat(c.locale, {
+    minimumFractionDigits: c.decimals,
+    maximumFractionDigits: c.decimals,
+  }).format(converted)
+  return `${c.symbol}${num}`
 }
 
 export function formatCompact(value: number) {

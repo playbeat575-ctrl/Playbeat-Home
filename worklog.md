@@ -342,3 +342,20 @@ Stage Summary:
 - Catalog trimmed to a single live-checkout product (Netflix). All other 25 products and their reviews deleted; existing orders retained (order items now reference product name/price but no product FK).
 - 8 categories intact and ready for new products.
 - Lemon Squeezy API key refreshed and verified working.
+
+---
+Task ID: 23 (re-create Netflix product after full wipe)
+Agent: main
+Task: User shared the Lemon Squeezy Netflix checkout URL again after the full product wipe — re-create the Netflix product linked to variant 1850448.
+
+Work Log:
+- Catalog was empty (0 products) after Task 22's full wipe. Categories intact (8).
+- Verified Lemon Squeezy still configured (liveCheckout:true) + variant 1850448 valid.
+- POST /api/admin/products → re-created "Netflix Premium Subscription": price $9.99 (compare $15.99), lemonVariantId 1850448, real cover image, icon Play, rose gradient, tags [netflix,streaming,subscription,4k,entertainment], flags featured+trending+flashDeal, hasLicenseKey, monthly subscription. Category: Software & Apps.
+
+Verification:
+- /api/products?flag=featured → Netflix present (variant 1850448). ✓
+- POST /api/checkout with Netflix → real hosted URL https://playbeatdigital.lemonsqueezy.com/checkout/custom/8f466ea6-..., demo:false. ✓
+
+Stage Summary:
+- Netflix Premium Subscription back in the catalog (1 product) with working live Lemon Squeezy checkout. 8 categories still intact.

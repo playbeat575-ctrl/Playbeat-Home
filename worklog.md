@@ -359,3 +359,25 @@ Verification:
 
 Stage Summary:
 - Netflix Premium Subscription back in the catalog (1 product) with working live Lemon Squeezy checkout. 8 categories still intact.
+
+---
+Task ID: 24 (Terms & Conditions + legal docs)
+Agent: main
+Task: Update Terms and Conditions — build comprehensive legal docs and wire into footer.
+
+Work Log:
+- Built src/components/legal-dialog.tsx — a reusable dialog with 4 comprehensive legal documents:
+  • Terms & Conditions (16 sections: Definitions, Eligibility, Digital Products & Delivery, Pricing & Currency, Payment & Checkout, Subscriptions & Renewals, License Keys, Refunds, Prohibited Conduct, IP, Disclaimer, Limitation of Liability, Third-Party Services, Changes, Governing Law, Contact) — tailored to PlayBeat Digital (Lemon Squeezy as MoR, PKR/USD currency, digital/license-key/subscriptions).
+  • Privacy Policy (7 sections: info collected, usage, data sharing with Lemon Squeezy/Neon, cookies, security, rights, contact).
+  • Refund Policy (4 sections: eligible refunds, non-refundable cases, how to request, chargebacks — digital-products-aware).
+  • License Agreement (5 sections: license types, what you may/may not do, revocation, updates & support).
+- Dialog styling: gradient navy header with icon + title + "Last updated" badge + PlayBeat badge, scrollable content area, premium dark-navy/blue/silver aesthetic matching the new design system.
+- Wired footer "Legal & Help" links: Terms of Service → terms dialog, Privacy Policy → privacy, Refund Policy → refund, License Agreement → license. Other footer links unchanged.
+
+Verification:
+- Lint clean.
+- Agent Browser: clicked "Terms of Service" in footer → dialog opened showing "Terms & Conditions" with sections 1–16 (Definitions, Eligibility, Digital Products, License Keys, etc.). Refund Policy dialog also verified (Eligible Refunds, Non-Refundable Cases, Chargebacks). No errors.
+- VLM confirmed: premium dark navy design, blue/silver accents, "Last updated: June 29, 2026", scrollable content, all section headings present.
+
+Stage Summary:
+- PlayBeat Digital now has comprehensive, tailored legal documents (Terms, Privacy, Refund, License) accessible from the footer. All written specifically for a digital marketplace using Lemon Squeezy payments with PKR/USD currency and license-key/subscription delivery.

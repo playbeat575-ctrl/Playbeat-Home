@@ -1,9 +1,11 @@
 'use client'
 
+import * as React from 'react'
 import { Sparkles, Twitter, Github, Linkedin, Youtube, Mail, ShieldCheck, Zap, Headphones, ArrowUpRight } from 'lucide-react'
 import { useStore } from '@/store/use-store'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { LegalDialog, type LegalDoc } from '@/components/legal-dialog'
 
 const features = [
   { icon: Zap, title: 'Instant Delivery', desc: 'Get your files & keys immediately after payment.' },
@@ -32,6 +34,8 @@ const columns = [
 
 export function Footer() {
   const navigate = useStore((s) => s.navigate)
+  const [legalDoc, setLegalDoc] = React.useState<LegalDoc | null>(null)
+  const openLegal = (doc: LegalDoc) => setLegalDoc(doc)
 
   return (
     <footer className="mt-auto border-t bg-secondary/40">
@@ -88,8 +92,13 @@ export function Footer() {
                   <li key={l}>
                     <button
                       onClick={() => {
-                        if (col.title === 'Marketplace' && l === 'All Products') navigate({ name: 'shop' })
-                        else if (col.title === 'Marketplace' && l === 'Featured') navigate({ name: 'shop' })
+                        if (col.title === 'Legal & Help') {
+                          if (l === 'Terms of Service') return openLegal('terms')
+                          if (l === 'Privacy Policy') return openLegal('privacy')
+                          if (l === 'Refund Policy') return openLegal('refund')
+                          if (l === 'License Agreement') return openLegal('license')
+                        }
+                        if (col.title === 'Marketplace' && (l === 'All Products' || l === 'Featured')) navigate({ name: 'shop' })
                         else navigate({ name: 'home' })
                       }}
                       className="text-sm text-muted-foreground transition-colors hover:text-foreground"
@@ -117,6 +126,10 @@ export function Footer() {
           </div>
         </div>
       </div>
+
+      {legalDoc && (
+        <LegalDialog doc={legalDoc} open={!!legalDoc} onOpenChange={(v) => !v && setLegalDoc(null)} />
+      )}
     </footer>
   )
 }

@@ -187,3 +187,18 @@ Stage Summary:
 - Admin is now gated behind a real login (founder@playbeat.digital / Playbeat123).
 - Full product adder (create with price + image upload/URL + all fields + flags) and product manager (edit/duplicate/delete) wired to the database.
 - Storefront Builder lets the founder curate which products appear in each home-page rail via toggle — changes reflect live on the storefront.
+
+---
+Task ID: 16 (refresh Lemon Squeezy API key)
+Agent: main
+Task: Update .env with the new Lemon Squeezy JWT API key provided by the user.
+
+Work Log:
+- The .env had been reset to the old SQLite DATABASE_URL line. Restored the full file: Neon PostgreSQL connection string + new LEMON_API_KEY (JWT, iat 1782732927) + LEMON_STORE_ID=420060 + empty variant/webhook + demo=false.
+- Restarted dev server (unset stale shell DATABASE_URL, passed Neon URL via env).
+- GET /api/lemon/status → {"configured":true,"user":{"name":"Playbeat digital pvt ltd","email":"playbeat575@gmail.com"},"stores":[{"id":"420060"}],"storeId":"420060","liveCheckout":false}. New key authenticates successfully against the same account.
+- liveCheckout remains false because LEMON_DEFAULT_VARIANT_ID is empty (no products in the Lemon Squeezy store yet). Demo checkout fallback still active.
+
+Stage Summary:
+- Lemon Squeezy API key refreshed and verified working. Account: Playbeat digital pvt ltd (store 420060).
+- .env is gitignored (not pushed to GitHub) — key stays local.

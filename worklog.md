@@ -288,3 +288,36 @@ Stage Summary:
 - Project live at https://github.com/playbeat575-ctrl/Playbeat-Home (public, 145 files).
 - Secrets (.env with Neon DB password + Lemon Squeezy API key) confirmed NOT pushed.
 - Token removed from git remote URL after push.
+
+---
+Task ID: 21 (hero + design redesign — deep navy / electric blue / silver)
+Agent: main
+Task: Redesign hero with "Design. Develop. Dominate." + new premium palette (midnight navy bg, electric/royal/azure blue, silver/platinum/steel, cyan glow), glassmorphism, neon glow, floating UI.
+
+Work Log:
+- REWROTE src/app/globals.css with the new design system:
+  • New palette tokens — background midnight navy #030712, deep navy #071526, space black #0F172A; primary electric blue #2F80FF / royal #2563EB / azure #60A5FA; secondary titanium silver #E5E7EB / platinum #F8FAFC / steel #CBD5E1; accent cyan glow #38BDF8.
+  • Bumped --radius to 1.25rem (20px) for premium rounded corners.
+  • Backward-compat: remapped legacy --brand-yellow → #38BDF8 (cyan glow) and --navy → #0F172A so ALL existing components (product cards, flash deals, badges, admin) render in the new blue/silver aesthetic without code changes.
+  • New utilities: .glass / .glass-strong / .glass-nav (frosted glass), .text-gradient-blue/.silver/.navy, .btn-gradient-primary (blue→silver gradient + glow on hover), .bg-grid/.bg-grid-fine/.bg-mesh/.bg-radial-glow, .shadow-glow-blue/.cyan/.elevate, .border-gradient-animate, .animate-float/.float-slow/.orb, .mask-fade-b.
+  • Dark theme is the DEFAULT (premium navy experience); light theme kept as a clean platinum/white variant.
+- Set defaultTheme="dark" + enableSystem=false in layout.tsx so the premium navy experience loads by default.
+- REWROTE src/components/sections/hero-slider.tsx — completely new hero:
+  • Background: bg-mesh + fine grid overlay (mask-fade-b) + 3 animated blurred orbs (electric blue, cyan, royal) + silver light streak.
+  • Copy: "Premium Digital Studio" badge → "Design. Develop. Dominate." (3-line H1, "Dominate." in blue gradient) → provided subtext → 2 CTAs (primary blue→silver gradient with glow + secondary glass with silver border) → trust row → service pills (Branding, Web Dev, Marketing, Strategy).
+  • Floating dashboard preview: glass-strong card with traffic-light header, revenue ($48,290 +12.4%), animated bar chart (12 bars growing in), 3 mini-stats (orders/customers/conversion). Two floating product cards (real featured products) with parallax + float animation. Floating downloads badge.
+  • Parallax: useScroll + useTransform for floating elements; opacity fade on scroll.
+  • Stats row with animated number counters (IntersectionObserver + requestAnimationFrame easing): 2000+ products, 48K+ customers, 4.9/5 rating, 99.9% uptime.
+- Updated navbar announcement bar to deep-navy gradient with cyan-glow accents (was navy+yellow).
+- Flash deals section + all other components inherit the new palette automatically via the remapped tokens.
+
+Verification:
+- Lint clean.
+- Agent Browser: hero renders with "Design. Develop. Dominate." heading + "Explore marketplace" CTA, no errors.
+- VLM desktop: "Design. Develop. Dominate." with blue gradient on "Dominate.", deep navy + blue/cyan glow, glass dashboard card with revenue chart, floating product cards, stats counters. "Premium vibe (Apple/Stripe/Linear) is strong, no notable issues."
+- VLM mobile (390px): responsive and polished, deep navy + blue glow, readable hierarchy.
+
+Stage Summary:
+- PlayBeat Digital fully rebranded to the premium deep-navy + electric-blue + metallic-silver aesthetic with glassmorphism, neon glow, and floating UI.
+- Hero now delivers the "Design. Develop. Dominate." brand statement with a floating glass dashboard preview, animated orbs, grid overlay, parallax, and stat counters.
+- All existing components (storefront + admin) inherit the new palette automatically; no yellow remains.

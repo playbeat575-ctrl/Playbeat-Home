@@ -246,12 +246,12 @@ export function Navbar() {
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="overflow-hidden bg-navy text-primary-foreground"
+              className="overflow-hidden border-b border-electric/20 bg-gradient-to-r from-deep-navy via-space-black to-deep-navy"
             >
-              <div className="mx-auto flex max-w-7xl items-center justify-center gap-2 px-4 py-1.5 text-xs">
-                <Tag className="h-3.5 w-3.5 text-brand-yellow" />
+              <div className="mx-auto flex max-w-7xl items-center justify-center gap-2 px-4 py-1.5 text-xs text-platinum">
+                <Tag className="h-3.5 w-3.5 text-cyan-glow" />
                 <span>Flash deals live now — up to 40% off. Code </span>
-                <code className="rounded bg-white/15 px-1.5 py-0.5 font-mono text-brand-yellow">FLASH25</code>
+                <code className="rounded bg-electric/20 px-1.5 py-0.5 font-mono text-cyan-glow">FLASH25</code>
                 <span className="hidden sm:inline">at checkout.</span>
               </div>
             </motion.div>

@@ -159,3 +159,31 @@ Work Log:
 Stage Summary:
 - 64 repositories deleted, 1 retained (playbeat-digital-marketplace).
 - All deletions irreversible (GitHub confirms via HTTP 204). No failures.
+
+---
+Task ID: 15 (admin login + product adder/manager + storefront builder)
+Agent: main
+Task: Add admin login (founder@playbeat.digital / Playbeat123), product adder & manager, storefront builder, add product with price + image.
+
+Work Log:
+- AUTH: Added adminAuthed/adminEmail/signInAdmin/signOutAdmin to Zustand store (persisted). signInAdmin validates against founder@playbeat.digital / Playbeat123. Added 'add-product' & 'storefront' to AdminSection type.
+- LOGIN PAGE: Built src/components/admin/admin-login.tsx — premium navy glassmorphism login with email/password fields, show/hide password, loading state, error messaging, founder-credential hint card, back-to-storefront link. AdminView shows <AdminLogin/> as a gate when !adminAuthed.
+- API: POST /api/admin/products (create with unique-slug generation, all fields + flags), PUT /api/admin/products/[id] (partial update), DELETE /api/admin/products/[id], POST /api/admin/upload (multipart file → saves to public/upload/, validates type/size, returns URL).
+- PRODUCT FORM: Built src/components/admin/product-form.tsx — Dialog with: live cover preview (real image + gradient fallback), image upload button (→ /api/admin/upload) + URL paste field, 10 gradient swatches, icon select (20 lucide icons), name/brand/tagline/description, category select, price (USD) + compare-at price, tag input with chips, 6 flag toggles (featured/trending/bestSeller/flashDeal/newArrival/licenseKey), subscription toggle + interval. Used for both create & edit (editing prop). Invalidates react-query caches on save.
+- PRODUCT MANAGER: Wired ProductsTable — "New product" opens form (create), Edit dropdown opens form (pre-filled), Duplicate POSTs a copy, Delete shows AlertDialog confirmation → DELETE API. All actions invalidate caches + toast.
+- STOREFRONT BUILDER: Built src/components/admin/storefront-builder.tsx — 5 summary cards (count per section), search + section filter chips, grid of product cards each with 5 flag toggle buttons (featured/trending/bestSeller/flashDeal/newArrival). Pending changes tracked client-side with ring highlight; per-product Save + sticky "Save all" bar. PUT updates via API, invalidates storefront queries so home rails update live.
+- ADMIN SHELL: Added nav items (Add Product, Product Manager, Storefront Builder) in 4 grouped sections. Replaced "Back to storefront" with "Storefront home" + added "Sign out" button. Header avatar now shows "Founder" + founder@playbeat.digital.
+- ADMIN VIEW: Login gate → Add Product landing (hero CTA + 4-step guide + link to Product Manager) → opens shared ProductForm.
+
+Verification (Agent Browser + curl):
+- Login page renders with email/password/Sign in; filled founder@playbeat.digital / Playbeat123 → clicked Sign in → dashboard renders with Revenue overview, Recent orders, new nav (Add Product, Storefront Builder, Storefront home). No console errors. ✓
+- Add Product landing → Open product form → filled name "Browser Test Product", price 55, image URL → Create product → toast "Product created · Browser Test Product" → API confirms product exists (price 55, image URL set). ✓
+- Storefront toggle: PUT featured:true → product appeared in /api/products?flag=featured rail → confirms Storefront Builder toggle wiring. ✓
+- Image upload: POST /api/admin/upload with PNG → returned /upload/pb-...png URL. ✓
+- Delete: DELETE API returned 200, product removed (count back to 25). ✓
+- Lint clean. Dev server healthy on Neon.
+
+Stage Summary:
+- Admin is now gated behind a real login (founder@playbeat.digital / Playbeat123).
+- Full product adder (create with price + image upload/URL + all fields + flags) and product manager (edit/duplicate/delete) wired to the database.
+- Storefront Builder lets the founder curate which products appear in each home-page rail via toggle — changes reflect live on the storefront.

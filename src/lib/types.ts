@@ -139,12 +139,14 @@ export type View =
 
 export type AdminSection =
   | 'dashboard'
+  | 'analytics'
   | 'products'
+  | 'add-product'
+  | 'storefront'
   | 'orders'
   | 'customers'
   | 'coupons'
+  | 'tickets'
   | 'categories'
   | 'reviews'
-  | 'tickets'
-  | 'analytics'
   | 'settings'

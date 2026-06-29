@@ -15,6 +15,12 @@ interface StoreState {
   currency: CurrencyCode
   setCurrency: (c: CurrencyCode) => void
 
+  // Admin auth (mock — founder@playbeat.digital / Playbeat123)
+  adminAuthed: boolean
+  adminEmail: string | null
+  signInAdmin: (email: string, password: string) => boolean
+  signOutAdmin: () => void
+
   // Cart
   cart: CartItem[]
   cartOpen: boolean
@@ -61,6 +67,17 @@ export const useStore = create<StoreState>()(
 
       currency: DEFAULT_CURRENCY,
       setCurrency: (c) => set({ currency: c }),
+
+      adminAuthed: false,
+      adminEmail: null,
+      signInAdmin: (email, password) => {
+        const valid =
+          email.trim().toLowerCase() === 'founder@playbeat.digital' &&
+          password === 'Playbeat123'
+        if (valid) set({ adminAuthed: true, adminEmail: 'founder@playbeat.digital' })
+        return valid
+      },
+      signOutAdmin: () => set({ adminAuthed: false, adminEmail: null }),
 
       cart: [],
       cartOpen: false,
@@ -129,6 +146,8 @@ export const useStore = create<StoreState>()(
         appliedCoupon: s.appliedCoupon,
         user: s.user,
         currency: s.currency,
+        adminAuthed: s.adminAuthed,
+        adminEmail: s.adminEmail,
       }),
     }
   )

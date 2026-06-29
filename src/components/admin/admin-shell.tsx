@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import {
   LayoutDashboard, Package, ShoppingCart, Users, Ticket, BarChart3, Settings,
   Sparkles, ArrowLeft, Search, Bell, Tag, ChevronRight, Crown, LogOut,
+  PlusCircle, Store, Home,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -20,7 +21,9 @@ import type { AdminSection } from '@/lib/types'
 const NAV: { section: AdminSection; label: string; icon: any }[] = [
   { section: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { section: 'analytics', label: 'Analytics', icon: BarChart3 },
-  { section: 'products', label: 'Products', icon: Package },
+  { section: 'add-product', label: 'Add Product', icon: PlusCircle },
+  { section: 'products', label: 'Product Manager', icon: Package },
+  { section: 'storefront', label: 'Storefront Builder', icon: Store },
   { section: 'orders', label: 'Orders', icon: ShoppingCart },
   { section: 'customers', label: 'Customers', icon: Users },
   { section: 'coupons', label: 'Coupons', icon: Tag },
@@ -41,6 +44,8 @@ export function AdminShell({
 }) {
   const navigate = useStore((s) => s.navigate)
   const view = useStore((s) => s.view)
+  const signOutAdmin = useStore((s) => s.signOutAdmin)
+  const adminEmail = useStore((s) => s.adminEmail)
   const currentSection = (view.name === 'admin' ? view.section : 'dashboard') as AdminSection
   const { data: stats } = useAdminStats()
 
@@ -67,12 +72,16 @@ export function AdminShell({
           {NAV.slice(0, 2).map((item) => (
             <NavItem key={item.section} item={item} active={currentSection === item.section} />
           ))}
-          <div className="px-3 pb-2 pt-4 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Catalog & Sales</div>
-          {NAV.slice(2, 6).map((item) => (
+          <div className="px-3 pb-2 pt-4 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Catalog</div>
+          {NAV.slice(2, 5).map((item) => (
+            <NavItem key={item.section} item={item} active={currentSection === item.section} />
+          ))}
+          <div className="px-3 pb-2 pt-4 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Sales & CRM</div>
+          {NAV.slice(5, 8).map((item) => (
             <NavItem key={item.section} item={item} active={currentSection === item.section} />
           ))}
           <div className="px-3 pb-2 pt-4 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">System</div>
-          {NAV.slice(6).map((item) => (
+          {NAV.slice(8).map((item) => (
             <NavItem key={item.section} item={item} active={currentSection === item.section} />
           ))}
         </nav>
@@ -90,12 +99,21 @@ export function AdminShell({
           </div>
         )}
 
-        <div className="border-t p-3">
+        <div className="space-y-1 border-t p-3">
           <button
             onClick={() => navigate({ name: 'home' })}
             className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
           >
-            <ArrowLeft className="h-4 w-4" /> Back to storefront
+            <Home className="h-4 w-4" /> Storefront home
+          </button>
+          <button
+            onClick={() => {
+              signOutAdmin()
+              navigate({ name: 'home' })
+            }}
+            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-rose-600 transition-colors hover:bg-rose-500/10"
+          >
+            <LogOut className="h-4 w-4" /> Sign out
           </button>
         </div>
       </aside>
@@ -121,11 +139,11 @@ export function AdminShell({
             <ThemeToggle />
             <div className="flex items-center gap-2 rounded-full border px-2 py-1">
               <Avatar className="h-7 w-7">
-                <AvatarFallback className="bg-navy text-[10px] font-bold text-primary-foreground">SA</AvatarFallback>
+                <AvatarFallback className="bg-navy text-[10px] font-bold text-primary-foreground">F</AvatarFallback>
               </Avatar>
               <div className="hidden text-left sm:block">
-                <div className="text-xs font-semibold leading-tight">Super Admin</div>
-                <div className="text-[10px] text-muted-foreground">admin@playbeat.dev</div>
+                <div className="text-xs font-semibold leading-tight">Founder</div>
+                <div className="max-w-[140px] truncate text-[10px] text-muted-foreground">{adminEmail || 'founder@playbeat.digital'}</div>
               </div>
               <Crown className="h-3.5 w-3.5 text-brand-yellow" />
             </div>

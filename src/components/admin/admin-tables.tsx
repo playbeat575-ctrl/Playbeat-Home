@@ -16,23 +16,77 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { ProductCover } from '@/components/product-cover'
 import { StatusBadge } from '@/components/admin/dashboard'
+import { ProductForm } from '@/components/admin/product-form'
 import { useAdminProducts, useAdminOrders, useAdminCustomers, useAdminCoupons, useAdminTickets } from '@/lib/hooks'
 import { formatDate, formatCompact } from '@/lib/format'
 import { useCurrency } from '@/lib/use-currency'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
+import { useQueryClient } from '@tanstack/react-query'
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
+  AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import type { Product } from '@/lib/types'
 
 export function ProductsTable() {
   const { data, isLoading } = useAdminProducts()
   const products = data?.products ?? []
   const [search, setSearch] = React.useState('')
   const { format: fmt } = useCurrency()
+  const qc = useQueryClient()
+  const [formOpen, setFormOpen] = React.useState(false)
+  const [editing, setEditing] = React.useState<Product | null>(null)
+  const [deleting, setDeleting] = React.useState<Product | null>(null)
+  const [deleteBusy, setDeleteBusy] = React.useState(false)
 
   const filtered = products.filter(
     (p) => p.name.toLowerCase().includes(search.toLowerCase()) || p.brand.toLowerCase().includes(search.toLowerCase())
   )
 
+  const openNew = () => { setEditing(null); setFormOpen(true) }
+  const openEdit = (p: Product) => { setEditing(p); setFormOpen(true) }
+
+  const confirmDelete = async () => {
+    if (!deleting) return
+    setDeleteBusy(true)
+    try {
+      const res = await fetch(`/api/admin/products/${deleting.id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error('Delete failed')
+      toast.success('Product deleted', { description: deleting.name })
+      qc.invalidateQueries({ queryKey: ['admin-products'] })
+      qc.invalidateQueries({ queryKey: ['products'] })
+      setDeleting(null)
+    } catch (e: any) {
+      toast.error(e.message || 'Delete failed')
+    } finally {
+      setDeleteBusy(false)
+    }
+  }
+
+  const duplicate = async (p: Product) => {
+    try {
+      const res = await fetch('/api/admin/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: p.name + ' (copy)', tagline: p.tagline, description: p.description, categoryId: p.categoryId,
+          brand: p.brand, price: p.price, compareAtPrice: p.compareAtPrice,
+          coverImage: p.coverImage, icon: p.icon, coverGradient: p.coverGradient,
+          tags: p.tags, hasLicenseKey: p.hasLicenseKey, isSubscription: p.isSubscription,
+          subscriptionInterval: p.subscriptionInterval,
+        }),
+      })
+      if (!res.ok) throw new Error('Duplicate failed')
+      toast.success('Product duplicated', { description: p.name + ' (copy)' })
+      qc.invalidateQueries({ queryKey: ['admin-products'] })
+    } catch (e: any) {
+      toast.error(e.message || 'Duplicate failed')
+    }
+  }
+
   return (
+    <>
     <Card className="overflow-hidden shadow-card-soft">
       <div className="flex flex-col gap-3 border-b p-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative max-w-xs flex-1">
@@ -43,7 +97,7 @@ export function ProductsTable() {
           <Button variant="outline" size="sm" className="gap-1.5" onClick={() => toast.info('Exporting CSV…')}>
             <FileDown className="h-4 w-4" /> Export
           </Button>
-          <Button size="sm" className="gap-1.5" onClick={() => toast.info('Open product editor')}>
+          <Button size="sm" className="gap-1.5" onClick={openNew}>
             <Plus className="h-4 w-4" /> New product
           </Button>
         </div>
@@ -103,10 +157,10 @@ export function ProductsTable() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
                           <DropdownMenuItem onClick={() => toast.info(`Viewing ${p.name}`)}><Eye className="mr-2 h-4 w-4" /> View</DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => toast.info('Opening editor')}><Pencil className="mr-2 h-4 w-4" /> Edit</DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => toast.info('Duplicated')}><Plus className="mr-2 h-4 w-4" /> Duplicate</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => openEdit(p)}><Pencil className="mr-2 h-4 w-4" /> Edit</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => duplicate(p)}><Plus className="mr-2 h-4 w-4" /> Duplicate</DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-rose-600" onClick={() => toast.error('Archived (demo)')}><Trash2 className="mr-2 h-4 w-4" /> Archive</DropdownMenuItem>
+                          <DropdownMenuItem className="text-rose-600" onClick={() => setDeleting(p)}><Trash2 className="mr-2 h-4 w-4" /> Delete</DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </td>
@@ -120,6 +174,30 @@ export function ProductsTable() {
         <span>Page 1 of 1</span>
       </div>
     </Card>
+
+    <ProductForm open={formOpen} onOpenChange={setFormOpen} editing={editing} />
+
+    <AlertDialog open={!!deleting} onOpenChange={(v) => !v && setDeleting(null)}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete this product?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This will permanently delete <strong>{deleting?.name}</strong> from your marketplace. This action cannot be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={deleteBusy}>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={(e) => { e.preventDefault(); confirmDelete() }}
+            disabled={deleteBusy}
+            className="bg-rose-600 text-white hover:bg-rose-700"
+          >
+            {deleteBusy ? 'Deleting…' : 'Delete product'}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   )
 }
 

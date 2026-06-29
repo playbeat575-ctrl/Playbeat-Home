@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
@@ -95,6 +96,12 @@ export default function RootLayout({
           <Toaster />
           <SonnerToaster position="top-right" richColors closeButton />
         </ThemeProvider>
+        {/* Lemon Squeezy embedded checkout script */}
+        <Script
+          src="https://assets.lemonsqueezy.com/lemon.js"
+          strategy="afterInteractive"
+          defer
+        />
       </body>
     </html>
   );

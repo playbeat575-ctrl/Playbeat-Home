@@ -45,6 +45,7 @@ export interface Product {
   subscriptionInterval: string | null
   coverGradient: string
   coverImage: string | null
+  lemonVariantId: string | null
   icon: string
   tags: string[]
   fileName: string | null

@@ -50,6 +50,7 @@ export interface ProductFormData {
   icon: string
   coverGradient: string
   tags: string
+  lemonVariantId: string
   featured: boolean
   trending: boolean
   bestSeller: boolean
@@ -63,7 +64,7 @@ export interface ProductFormData {
 const EMPTY: ProductFormData = {
   name: '', tagline: '', description: '', categoryId: '', brand: 'PlayBeat Studios',
   price: '', compareAtPrice: '', coverImage: '', icon: 'Sparkles',
-  coverGradient: GRADIENTS[0], tags: '', featured: false, trending: false,
+  coverGradient: GRADIENTS[0], tags: '', lemonVariantId: '', featured: false, trending: false,
   bestSeller: false, flashDeal: false, newArrival: false, hasLicenseKey: false,
   isSubscription: false, subscriptionInterval: 'monthly',
 }
@@ -95,6 +96,7 @@ export function ProductForm({
         price: String(editing.price),
         compareAtPrice: editing.compareAtPrice ? String(editing.compareAtPrice) : '',
         coverImage: editing.coverImage || '',
+        lemonVariantId: editing.lemonVariantId || '',
         icon: editing.icon,
         coverGradient: editing.coverGradient,
         tags: Array.isArray(editing.tags) ? editing.tags.join(', ') : '',
@@ -325,6 +327,37 @@ export function ProductForm({
                 <Input id="compareAt" type="number" step="0.01" min="0" value={form.compareAtPrice} onChange={(e) => set('compareAtPrice', e.target.value)} placeholder="149" className="pl-7" />
               </div>
             </div>
+          </div>
+
+          {/* Lemon Squeezy variant mapping */}
+          <div className="rounded-xl border bg-secondary/40 p-4">
+            <div className="flex items-center gap-2">
+              <span className="grid h-7 w-7 place-items-center rounded-md bg-brand-yellow/20 text-brand-yellow-foreground dark:text-brand-yellow">
+                <Sparkles className="h-4 w-4" />
+              </span>
+              <div>
+                <Label htmlFor="lemonVariantId" className="text-sm font-semibold">Lemon Squeezy variant ID</Label>
+                <p className="text-[11px] text-muted-foreground">
+                  Link this product to a Lemon Squeezy variant for live hosted checkout. Found in your Lemon dashboard → product → variant.
+                </p>
+              </div>
+            </div>
+            <Input
+              id="lemonVariantId"
+              value={form.lemonVariantId}
+              onChange={(e) => set('lemonVariantId', e.target.value)}
+              placeholder="e.g. 1850448"
+              className="mt-2"
+            />
+            {form.lemonVariantId ? (
+              <p className="mt-1.5 text-[11px] text-emerald-600 dark:text-emerald-400">
+                ✓ Live checkout enabled for this product — buyers redirect to Lemon Squeezy.
+              </p>
+            ) : (
+              <p className="mt-1.5 text-[11px] text-muted-foreground">
+                Leave empty to use the default variant (demo mode if none set).
+              </p>
+            )}
           </div>
 
           {/* Tags */}

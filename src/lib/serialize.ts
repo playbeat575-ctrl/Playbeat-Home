@@ -37,6 +37,7 @@ export function serializeProduct(p: any): Product {
     subscriptionInterval: p.subscriptionInterval,
     coverGradient: p.coverGradient,
     coverImage: p.coverImage,
+    lemonVariantId: p.lemonVariantId,
     icon: p.icon,
     tags: p.tags ? p.tags.split(',').filter(Boolean) : [],
     fileName: p.fileName,

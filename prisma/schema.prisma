@@ -66,6 +66,7 @@ model Product {
   subscriptionInterval String? // monthly | yearly
   coverGradient   String    // tailwind gradient classes for visual
   coverImage      String?   // real product image URL (optional; falls back to gradient)
+  lemonVariantId  String?   // Lemon Squeezy variant ID for live hosted checkout (per-product)
   icon            String    // lucide icon name
   tags            String
   fileUrl         String?

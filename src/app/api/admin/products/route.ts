@@ -31,7 +31,7 @@ export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}))
   const {
     name, tagline, description, categoryId, brand, price, compareAtPrice,
-    coverImage, icon, tags, coverGradient,
+    coverImage, icon, tags, coverGradient, lemonVariantId,
     featured, trending, bestSeller, flashDeal, newArrival,
     hasLicenseKey, isSubscription, subscriptionInterval,
   } = body
@@ -56,6 +56,7 @@ export async function POST(req: Request) {
       price: Number(price),
       compareAtPrice: compareAtPrice ? Number(compareAtPrice) : null,
       coverImage: coverImage || null,
+      lemonVariantId: lemonVariantId || null,
       icon: icon || 'Sparkles',
       coverGradient: coverGradient || GRADIENTS[Math.floor(Math.random() * GRADIENTS.length)],
       tags: Array.isArray(tags) ? tags.join(',') : (typeof tags === 'string' ? tags : ''),

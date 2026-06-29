@@ -83,6 +83,42 @@ export function CheckoutView() {
     }
   }
 
+  // After a successful Lemon Squeezy embedded payment, record the order in the DB.
+  const createOrderAfterPayment = async (
+    checkoutItems: { id: string; name: string; price: number; quantity: number; licenseKey?: boolean }[],
+    pkrTotal?: number
+  ) => {
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: checkoutItems,
+          customer: { name, email },
+          coupon: appliedCoupon,
+          paymentMethod: 'lemonsqueezy',
+          currency: 'PKR',
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      setSuccess({
+        orderId: data.orderId,
+        orderNumber: data.orderNumber,
+        items: data.items,
+        total: data.total,
+        currency: 'PKR',
+        displayTotal: pkrTotal,
+      })
+      clearCart()
+      toast.success('Payment successful!')
+    } catch (e: any) {
+      toast.error('Payment received but order recording failed: ' + (e.message || ''))
+    } finally {
+      setProcessing(false)
+    }
+  }
+
   const pay = async () => {
     if (!email || !name) {
       toast.error('Please enter your name and email')
@@ -99,6 +135,7 @@ export function CheckoutView() {
       price: i.product.price,
       quantity: i.quantity,
       licenseKey: i.product.hasLicenseKey,
+      lemonVariantId: i.product.lemonVariantId,
     }))
 
     try {
@@ -118,9 +155,48 @@ export function CheckoutView() {
       const coData = await co.json()
 
       if (coData.url) {
-        // Live Lemon Squeezy hosted checkout — redirect away.
-        toast.success('Redirecting to Lemon Squeezy secure checkout…')
-        window.location.href = coData.url
+        // Live Lemon Squeezy checkout — open as an embedded overlay (no redirect).
+        const checkoutUrl = coData.url as string
+        const pkrTotal = coData.pkrTotal as number | undefined
+        toast.success('Opening secure Lemon Squeezy checkout…')
+
+        // Wait for lemon.js to be ready, then open the embedded overlay.
+        const openEmbedded = () => {
+          const LS = window.LemonSqueezy
+          if (!LS) {
+            // Fallback: redirect if lemon.js hasn't loaded
+            window.location.href = checkoutUrl
+            return
+          }
+          // Register event handlers
+          LS.Setup({
+            eventHandler: (e) => {
+              if (e.event === LS.Events.Success) {
+                // Payment succeeded — create the order in the DB, then close overlay
+                LS.Url.Close()
+                createOrderAfterPayment(checkoutItems, pkrTotal)
+              } else if (e.event === LS.Events.Error) {
+                toast.error('Checkout error. Please try again.')
+                setProcessing(false)
+              }
+            },
+          })
+          LS.Url.Open(checkoutUrl)
+        }
+
+        // lemon.js loads via next/script afterInteractive; poll if needed.
+        if (window.LemonSqueezy) {
+          openEmbedded()
+        } else {
+          let tries = 0
+          const wait = setInterval(() => {
+            tries++
+            if (window.LemonSqueezy || tries > 30) {
+              clearInterval(wait)
+              openEmbedded()
+            }
+          }, 200)
+        }
         return
       }
 
@@ -425,17 +501,21 @@ export function CheckoutView() {
                   <span>Total <span className="text-xs font-normal text-muted-foreground">({currencyInfo.code})</span></span>
                   <span>{fmt(total)}</span>
                 </div>
-                {currencyInfo.code !== 'USD' && (
+                {lemonStatus?.liveCheckout ? (
                   <p className="text-[11px] text-muted-foreground">
-                    ≈ ${total.toFixed(2)} USD base · checkout processed in USD via Lemon Squeezy.
+                    ≈ ₨{Math.round(total * 285).toLocaleString()} PKR · charged in PKR via Lemon Squeezy secure checkout.
                   </p>
-                )}
+                ) : currencyInfo.code !== 'USD' ? (
+                  <p className="text-[11px] text-muted-foreground">
+                    ≈ ${total.toFixed(2)} USD base · demo checkout.
+                  </p>
+                ) : null}
               </div>
 
               <Button size="lg" className="mt-4 w-full gap-2" onClick={pay} disabled={processing}>
                 {processing ? (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin" /> Processing…
+                    <Loader2 className="h-4 w-4 animate-spin" /> {lemonStatus?.liveCheckout ? 'Opening checkout…' : 'Processing…'}
                   </>
                 ) : (
                   <>

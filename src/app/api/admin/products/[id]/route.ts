@@ -13,7 +13,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   const body = await req.json().catch(() => ({}))
   const {
     name, tagline, description, categoryId, brand, price, compareAtPrice,
-    coverImage, icon, tags, coverGradient,
+    coverImage, icon, tags, coverGradient, lemonVariantId,
     featured, trending, bestSeller, flashDeal, newArrival,
     hasLicenseKey, isSubscription, subscriptionInterval,
   } = body
@@ -41,6 +41,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       ...(price !== undefined && { price: Number(price) }),
       ...(compareAtPrice !== undefined && { compareAtPrice: compareAtPrice ? Number(compareAtPrice) : null }),
       ...(coverImage !== undefined && { coverImage: coverImage || null }),
+      ...(lemonVariantId !== undefined && { lemonVariantId: lemonVariantId || null }),
       ...(icon !== undefined && { icon }),
       ...(coverGradient !== undefined && { coverGradient }),
       ...(tags !== undefined && { tags: Array.isArray(tags) ? tags.join(',') : String(tags) }),

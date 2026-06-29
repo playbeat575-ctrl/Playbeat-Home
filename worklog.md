@@ -202,3 +202,30 @@ Work Log:
 Stage Summary:
 - Lemon Squeezy API key refreshed and verified working. Account: Playbeat digital pvt ltd (store 420060).
 - .env is gitignored (not pushed to GitHub) — key stays local.
+
+---
+Task ID: 17 (live Lemon Squeezy checkout + Netflix product + per-product variant mapping)
+Agent: main
+Task: User shared a Lemon Squeezy "Buy Netflix" checkout embed (variant bd4d3366-...). Enable live checkout, add per-product variant mapping, create Netflix product.
+
+Work Log:
+- Inspected the Lemon Squeezy store via SDK: found published product "Netlix" (id 1183314) with 2 variants — 1850448 ("Default", $480.00, published) and 1850541 ($9.99, pending). The published variant 1850448 powers the user's checkout button. Verified createCheckout works (status 201, real hosted URL).
+- Set LEMON_DEFAULT_VARIANT_ID="1850448" in .env → GET /api/lemon/status now returns liveCheckout:true.
+- Added lemonVariantId String? to Prisma Product schema → pushed to Neon → regenerated Prisma Client. Updated serializer + types to include lemonVariantId.
+- Updated /api/admin/products POST + /api/admin/products/[id] PUT to accept + persist lemonVariantId.
+- Reworked /api/checkout: resolves per-product lemonVariantId from the DB (or client payload), prefers the first item's per-product variant, falls back to LEMON_DEFAULT_VARIANT_ID; passes custom price only for mixed/default-variant carts; single-product-per-variant checkouts use the variant's own Lemon price.
+- Updated CheckoutView to send lemonVariantId with each cart item.
+- Added a "Lemon Squeezy variant ID" field to ProductForm (with live-checkout-enabled hint) so the founder can map any product to a Lemon variant from the admin.
+- Created "Netflix Premium Subscription" product via API: price $9.99 (compare $15.99), real cover image (image-search: "netflix streaming app on smart tv"), lemonVariantId 1850448, icon Play, rose gradient, tags [netflix,streaming,subscription,4k,entertainment], flags featured+trending+flashDeal, hasLicenseKey, monthly subscription. Category: Software & Apps.
+
+Verification:
+- /api/lemon/status → liveCheckout:true, variantId:"1850448". ✓
+- POST /api/checkout with the Netflix product → returned a real Lemon Squeezy hosted URL (https://playbeatdigital.lemonsqueezy.com/checkout/custom/4165b222-...), demo:false, variantId:1850448. ✓
+- Netflix product appears in storefront featured rail + search. ✓
+- Product detail page renders with PKR price (Rs 2,847), real Netflix cover image, Buy now button (VLM-confirmed). ✓
+- 26 total products in catalog. Lint clean.
+
+Stage Summary:
+- Live Lemon Squeezy hosted checkout is fully enabled — buyers now redirect to playbeatdigital.lemonsqueezy.com to pay.
+- Per-product variant mapping added: each product can link to its own Lemon Squeezy variant via the admin ProductForm.
+- "Netflix Premium Subscription" product live on the storefront with real image, PKR pricing, and working live checkout.

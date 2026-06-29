@@ -229,3 +229,23 @@ Stage Summary:
 - Live Lemon Squeezy hosted checkout is fully enabled — buyers now redirect to playbeatdigital.lemonsqueezy.com to pay.
 - Per-product variant mapping added: each product can link to its own Lemon Squeezy variant via the admin ProductForm.
 - "Netflix Premium Subscription" product live on the storefront with real image, PKR pricing, and working live checkout.
+
+---
+Task ID: 18 (new Neon DB + push to uzzirulzz-cyber/playbeatdigital)
+Agent: main
+Task: Switch database to the new Neon connection string; push project to github.com/uzzirulzz-cyber/playbeatdigital using a new PAT.
+
+Work Log:
+- Validated new GitHub token via GET /user → authenticated as "uzzirulzz-cyber" (free plan). Target repo uzzirulzz-cyber/playbeatdigital exists, public, default branch main, EMPTY (Git Repository is empty) — safe to push without force.
+- Updated .env DATABASE_URL to the new Neon connection (ep-wispy-unit-atr6ceqh-pooler, password npg_AgGESkM8tN3i). Kept Lemon Squeezy key + variant 1850448 unchanged.
+- Ran `db:push` against the new Neon DB (synced schema incl. lemonVariantId column in 13s) + `bun run seed` (8 categories, 25 products, reviews, coupons, orders, tickets).
+- Re-created the "Netflix Premium Subscription" product on the new DB via POST /api/admin/products (price $9.99, lemonVariantId 1850448, featured+trending+flashDeal, real cover image). New DB now has 26 products.
+- Verified .env is NOT git-tracked; .env.example IS tracked. Configured git identity (uzzirulzz-cyber). Working tree clean (all prior changes already committed). 145 tracked files.
+- Added token-authenticated remote → pushed main branch to uzzirulzz-cyber/playbeatdigital (new branch, tracked). Sanitized remote URL afterward to remove token from .git/config.
+- Verified via GitHub API: latest commit e1b1be9 present; .env returns 404 (not on GitHub — secrets safe); .env.example returns 200; product-form.tsx + schema.prisma return 200.
+- Restarted dev server on the new Neon DB. Health: home/products/lemon-status all 200. Netflix product present on new DB (variant 1850448). liveCheckout:true (Lemon Squeezy still wired).
+
+Stage Summary:
+- Database migrated to the new Neon project (ep-wispy-unit-atr6ceqh). All data re-seeded + Netflix product re-created.
+- Code pushed to https://github.com/uzzirulzz-cyber/playbeatdigital (145 files, public). Secrets (.env with DB password + Lemon API key) confirmed NOT on GitHub.
+- Token removed from git remote URL after push. Dev server running healthy on the new DB.

@@ -144,6 +144,7 @@ export type AdminSection =
   | 'products'
   | 'add-product'
   | 'storefront'
+  | 'lemon'
   | 'orders'
   | 'customers'
   | 'coupons'

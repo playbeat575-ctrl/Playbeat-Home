@@ -249,3 +249,26 @@ Stage Summary:
 - Database migrated to the new Neon project (ep-wispy-unit-atr6ceqh). All data re-seeded + Netflix product re-created.
 - Code pushed to https://github.com/uzzirulzz-cyber/playbeatdigital (145 files, public). Secrets (.env with DB password + Lemon API key) confirmed NOT on GitHub.
 - Token removed from git remote URL after push. Dev server running healthy on the new DB.
+
+---
+Task ID: 19 (Lemon Squeezy product creation — API limitation + linker tool)
+Agent: main
+Task: User asked to create products on Lemon Squeezy.
+
+Work Log:
+- Discovered Lemon Squeezy API does NOT support product/variant creation. Checked the official SDK (@lemonsqueezy/lemonsqueezy.js) exports — only createCheckout, createCustomer, createDiscount, createWebhook, createUsageRecord exist (no createProduct/createVariant). Verified via direct API: POST /v1/products and POST /v1/variants both return "The POST method is not supported for route ... Supported methods: GET, HEAD." This is a hard platform limitation — products/variants must be created in the Lemon Squeezy dashboard manually.
+- Pivoted to building a Lemon Squeezy Variant Linker admin tool so the founder can create products in the dashboard then bulk-link them to PlayBeat products.
+- Built GET /api/admin/lemon/products — uses listProducts + listVariants (GET, supported) to return all Lemon products with their variants (id, name, price, status, interval).
+- Added useLemonProducts() React Query hook + LemonProduct/LemonVariant types.
+- Built src/components/admin/lemon-linker.tsx — status banner (X/26 linked, Lemon product count, variant count), amber info banner explaining the API limitation with a "New product" button linking to the dashboard, searchable product table with a Lemon-variant <Select> dropdown per row (shows variant name + price), live/demo status badge, bulk Save bar, and a reference grid of all Lemon products + variants. Uses PUT /api/admin/products/[id] { lemonVariantId } to persist links.
+- Added 'lemon' to AdminSection type; wired into admin-shell nav (CreditCard icon, under Catalog group) + admin-view router.
+
+Verification:
+- GET /api/admin/lemon/products → returns 1 Lemon product "Netlix" (#1183314) with 2 variants (1850541 pending $9.99, 1850448 published $480.00). ✓
+- Agent Browser: logged in → navigated to "Lemon Squeezy" → linker renders with "Lemon Squeezy Linker" heading, product rows, variant dropdowns pre-filled. Netflix row shows variant 1850448 selected. ✓
+- VLM confirmed: "1/26 products linked, 1 Lemon product, 2 variants available". ✓
+- No console errors. Lint clean.
+
+Stage Summary:
+- Cannot programmatically create Lemon Squeezy products (API limitation, confirmed).
+- Built a Lemon Squeezy Variant Linker in the admin: founder creates products in the Lemon dashboard, clicks Refresh, then bulk-assigns variants to PlayBeat products. 1/26 currently linked (Netflix). The remaining 25 need products created in the Lemon dashboard first.

@@ -7,6 +7,7 @@ import { AdminDashboard } from '@/components/admin/dashboard'
 import { ProductsTable, OrdersTable, CustomersTable, CouponsTable, TicketsTable } from '@/components/admin/admin-tables'
 import { AnalyticsView, SettingsView } from '@/components/admin/admin-views'
 import { StorefrontBuilder } from '@/components/admin/storefront-builder'
+import { LemonLinker } from '@/components/admin/lemon-linker'
 import { ProductForm } from '@/components/admin/product-form'
 import { useStore } from '@/store/use-store'
 import type { AdminSection } from '@/lib/types'
@@ -17,6 +18,7 @@ const META: Record<AdminSection, { title: string; description: string }> = {
   'add-product': { title: 'Add Product', description: 'Create a new digital product with price, image and details.' },
   products: { title: 'Product Manager', description: 'Manage your digital catalog — edit, duplicate or delete products.' },
   storefront: { title: 'Storefront Builder', description: 'Curate which products appear in each section of your home page.' },
+  lemon: { title: 'Lemon Squeezy', description: 'Link PlayBeat products to Lemon Squeezy variants for live hosted checkout.' },
   orders: { title: 'Orders', description: 'Track and fulfill customer orders, refunds and invoices.' },
   customers: { title: 'Customers', description: 'View customer profiles, points and referral activity.' },
   coupons: { title: 'Coupons', description: 'Create and manage discount codes and promotions.' },
@@ -47,6 +49,7 @@ export function AdminView({ section = 'dashboard' }: { section?: AdminSection })
       )}
       {section === 'products' && <ProductsTable />}
       {section === 'storefront' && <StorefrontBuilder />}
+      {section === 'lemon' && <LemonLinker />}
       {section === 'orders' && <OrdersTable />}
       {section === 'customers' && <CustomersTable />}
       {section === 'coupons' && <CouponsTable />}

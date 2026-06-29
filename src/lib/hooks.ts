@@ -80,4 +80,27 @@ export function useAdminTickets() {
   })
 }
 
+export interface LemonVariant {
+  id: string
+  name: string
+  price: number
+  status: string
+  interval: string | null
+}
+export interface LemonProduct {
+  id: string
+  name: string
+  status: string
+  type?: string
+  url?: string
+  variants: LemonVariant[]
+}
+
+export function useLemonProducts() {
+  return useQuery<{ products: LemonProduct[] }>({
+    queryKey: ['lemon-products'],
+    queryFn: () => jfetch('/api/admin/lemon/products'),
+  })
+}
+
 export type { AdminSection }

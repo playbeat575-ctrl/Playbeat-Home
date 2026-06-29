@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import {
   LayoutDashboard, Package, ShoppingCart, Users, Ticket, BarChart3, Settings,
   Sparkles, ArrowLeft, Search, Bell, Tag, ChevronRight, Crown, LogOut,
-  PlusCircle, Store, Home,
+  PlusCircle, Store, Home, CreditCard,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -24,6 +24,7 @@ const NAV: { section: AdminSection; label: string; icon: any }[] = [
   { section: 'add-product', label: 'Add Product', icon: PlusCircle },
   { section: 'products', label: 'Product Manager', icon: Package },
   { section: 'storefront', label: 'Storefront Builder', icon: Store },
+  { section: 'lemon', label: 'Lemon Squeezy', icon: CreditCard },
   { section: 'orders', label: 'Orders', icon: ShoppingCart },
   { section: 'customers', label: 'Customers', icon: Users },
   { section: 'coupons', label: 'Coupons', icon: Tag },

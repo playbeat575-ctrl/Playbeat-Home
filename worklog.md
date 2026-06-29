@@ -272,3 +272,19 @@ Verification:
 Stage Summary:
 - Cannot programmatically create Lemon Squeezy products (API limitation, confirmed).
 - Built a Lemon Squeezy Variant Linker in the admin: founder creates products in the Lemon dashboard, clicks Refresh, then bulk-assigns variants to PlayBeat products. 1/26 currently linked (Netflix). The remaining 25 need products created in the Lemon dashboard first.
+
+---
+Task ID: 20 (push to playbeat575-ctrl/Playbeat-Home)
+Agent: main
+Task: Push the PlayBeat Digital project to git@github.com:playbeat575-ctrl/Playbeat-Home.git.
+
+Work Log:
+- The Playbeat-Home repo had been deleted in Task 19 along with all other repos on playbeat575-ctrl. Attempted to recreate via POST /user/repos → "name already exists" (repo was present and empty — size 0, "Git Repository is empty"). Either the prior deletion didn't persist or it was recreated; either way it was empty and ready.
+- Verified .env is NOT git-tracked before pushing. Updated git remote to https://x-access-token:...@github.com/playbeat575-ctrl/Playbeat-Home.git. Pushed main branch (new branch, tracked).
+- Sanitized remote URL afterward to remove the token from .git/config.
+- Verified via GitHub API: latest commit e86b3d6 present; .env returns 404 (not on GitHub — secrets safe); .env.example, README.md, product-form.tsx, lemon-linker.tsx all return 200.
+
+Stage Summary:
+- Project live at https://github.com/playbeat575-ctrl/Playbeat-Home (public, 145 files).
+- Secrets (.env with Neon DB password + Lemon Squeezy API key) confirmed NOT pushed.
+- Token removed from git remote URL after push.

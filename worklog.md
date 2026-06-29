@@ -321,3 +321,24 @@ Stage Summary:
 - PlayBeat Digital fully rebranded to the premium deep-navy + electric-blue + metallic-silver aesthetic with glassmorphism, neon glow, and floating UI.
 - Hero now delivers the "Design. Develop. Dominate." brand statement with a floating glass dashboard preview, animated orbs, grid overlay, parallax, and stat counters.
 - All existing components (storefront + admin) inherit the new palette automatically; no yellow remains.
+
+---
+Task ID: 22 (trim products to Netflix only + refresh Lemon key)
+Agent: main
+Task: Delete all products except the Lemon-Squeezy-linked Netflix product; keep categories; update Lemon API key to the new JWT.
+
+Work Log:
+- Updated .env LEMON_API_KEY to the new JWT (jti 07f15fcf..., iat 1782741147).
+- Wrote scripts/trim-products.ts: keeps products matching name~/"netflix" OR lemonVariantId=="1850448", deletes the rest via deleteMany. Reviews cascade (onDelete: Cascade on Review). OrderItem.productId is optional so it SetNulls on delete (order history preserved without product links).
+- Ran the script: 26 → 1 product. Kept: "Netflix Premium Subscription" (variant 1850448). Deleted: 25. Categories preserved: 8.
+- Restarted dev on Neon DB.
+
+Verification:
+- /api/admin/products → 1 product (Netflix Premium Subscription, variant 1850448). ✓
+- /api/categories → 8 categories preserved. ✓
+- /api/lemon/status (new key) → configured:true, user "Playbeat digital pvt ltd", liveCheckout:true. ✓
+
+Stage Summary:
+- Catalog trimmed to a single live-checkout product (Netflix). All other 25 products and their reviews deleted; existing orders retained (order items now reference product name/price but no product FK).
+- 8 categories intact and ready for new products.
+- Lemon Squeezy API key refreshed and verified working.
